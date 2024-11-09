@@ -1,0 +1,1944 @@
+<!doctype html>
+<html lang="zh-CN">
+ <head> 
+  <meta charset="utf-8"> 
+  <link rel="canonical" href="https://blog.csdn.net/weixin_42462202/article/details/99413781"> 
+  <meta http-equiv="content-type" content="text/html; charset=utf-8"> 
+  <meta name="renderer" content="webkit"> 
+  <meta name="force-rendering" content="webkit"> 
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"> 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"> 
+  <meta name="report" content="{&quot;pid&quot;: &quot;blog&quot;, &quot;spm&quot;:&quot;1001.2101&quot;}"> 
+  <meta name="referrer" content="always"> 
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+  <link rel="alternate" media="handheld" href="#"> 
+  <meta name="shenma-site-verification" content="5a59773ab8077d4a62bf469ab966a63b_1497598848"> 
+  <meta name="applicable-device" content="pc"> 
+  <link href="https://g.csdnimg.cn/static/logo/favicon32.ico" rel="shortcut icon" type="image/x-icon"> 
+  <title>从零开始写一个RTSP服务器（八）一个多播的RTSP服务器_rtsp服务器    ip地址-CSDN博客</title>  
+  <meta name="keywords" content="rtsp服务器    ip地址"> 
+  <meta name="csdn-baidu-search" content="{&quot;autorun&quot;:true,&quot;install&quot;:true,&quot;keyword&quot;:&quot;rtsp服务器    ip地址&quot;}"> 
+  <meta name="description" content="文章浏览阅读6.7k次，点赞7次，收藏17次。从零开始写一个RTSP服务器系列★我的开源项目-RtspServer从零开始写一个RTSP服务器（一）不一样的RTSP协议讲解从零开始写一个RTSP服务器（二）RTSP协议的实现从零开始写一个RTSP服务器（三）RTP传输H.264从零开始写一个RTSP服务器（四）一个传输H.264的RTSP服务器从零开始写一个RTSP服务器（五）RTP传输AAC从零开始写一个RTSP服务器（六）一..._rtsp服务器    ip地址"> 
+  <link rel="stylesheet" type="text/css" href="https://csdnimg.cn/release/blogv2/dist/pc/css/detail_enter-56f5809951.min.css">  
+  <link rel="stylesheet" type="text/css" href="https://csdnimg.cn/release/blogv2/dist/pc/themesSkin/skin-number/skin-number-2c93789924.min.css">    
+  <meta name="toolbar" content="{&quot;type&quot;:&quot;0&quot;,&quot;fixModel&quot;:&quot;1&quot;}">    
+  <link rel="stylesheet" type="text/css" href="https://csdnimg.cn/public/sandalstrap/1.4/css/sandalstrap.min.css"> 
+  <style>
+        .MathJax, .MathJax_Message, .MathJax_Preview{
+            display: none
+        }
+    </style>    
+ 	<style>
+	main div.blog-content-box pre {
+		max-height: 100%;
+		overflow-y: hidden;
+	}
+	</style>
+ </head>  
+ <body class="nodata " style=""> 
+  <div id="toolbarBox" style="min-height: 48px;"></div>    
+  <link rel="stylesheet" href="https://csdnimg.cn/release/blogv2/dist/pc/css/blog_code-01256533b5.min.css"> 
+  <link rel="stylesheet" href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/chart-3456820cac.css"> 
+  <link rel="stylesheet" href="https://g.csdnimg.cn/lib/swiper/6.0.4/css/swiper.css">   
+  <div class="main_father clearfix d-flex justify-content-center mainfather-concision" style="height:100%;"> 
+   <div class="container clearfix container-concision" id="mainBox">  
+    <main>  
+     <div class="blog-content-box"> 
+      <div class="article-header-box"> 
+       <div class="article-header"> 
+        <div class="article-title-box"> 
+         <h1 class="title-article" id="articleContentId">从零开始写一个RTSP服务器（八）一个多播的RTSP服务器</h1> 
+        </div> 
+        <div class="article-info-box"> 
+         <div class="up-time">
+          最新推荐文章于&nbsp;2023-10-20 16:16:18&nbsp;发布
+         </div> 
+         <div class="article-bar-top"> 
+          <img class="article-type-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/original.png" alt=""> 
+          <div class="bar-content"> 
+           <img class="article-vip-img-new" src="https://csdnimg.cn/release/blogv2/dist/pc/img/identityVipNew.png" alt=""> 
+           <a class="follow-nickName " href="https://blog.csdn.net/weixin_42462202" target="_blank" rel="noopener" title="JT同学">JT同学</a> 
+           <img class="article-time-img article-heard-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/newCurrentTime2.png" alt=""> 
+           <span class="time blog-postTime" data-time="2019-08-13 10:57:29">最新推荐文章于&nbsp;2023-10-20 16:16:18&nbsp;发布</span> 
+           <div class="read-count-box"> 
+            <img class="article-read-img article-heard-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/articleReadEyes2.png" alt=""> 
+            <span class="read-count">阅读量6.7k</span> 
+            <a id="blog_detail_zk_collection" class="un-collection" data-report-click="{&quot;mod&quot;:&quot;popu_823&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4232&quot;,&quot;ab&quot;:&quot;new&quot;}"> <img class="article-collect-img article-heard-img un-collect-status isdefault" style="display:inline-block" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarCollect2.png" alt=""> <img class="article-collect-img article-heard-img collect-status isactive" style="display:none" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarCollectionActive2.png" alt=""> <span class="name">收藏</span> <span class="get-collection"> 17 </span> </a> 
+            <div class="read-count-box is-like"> 
+             <img class="article-read-img article-heard-img" style="display:none" id="is-like-imgactive-new" src="https://csdnimg.cn/release/blogv2/dist/pc/img/newHeart2023Active.png" alt=""> 
+             <img class="article-read-img article-heard-img" style="display:block" id="is-like-img-new" src="https://csdnimg.cn/release/blogv2/dist/pc/img/newHeart2023Black.png" alt=""> 
+             <span class="read-count" id="blog-digg-num">点赞数 7 </span> 
+            </div> 
+           </div> 
+          </div> 
+         </div> 
+         <div class="blog-tags-box"> 
+          <div class="tags-box artic-tag-box"> 
+           <span class="label">分类专栏：</span> 
+           <a class="tag-link" href="https://blog.csdn.net/weixin_42462202/category_9293806.html" target="_blank" rel="noopener">从零开始写一个RTSP服务器</a> 
+           <span class="label">文章标签：</span> 
+           <a rel="noopener" data-report-query="spm=1001.2101.3001.4223" data-report-click="{&quot;mod&quot;:&quot;popu_626&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4223&quot;,&quot;strategy&quot;:&quot;rtsp&quot;,&quot;ab&quot;:&quot;new&quot;,&quot;extra&quot;:&quot;{\&quot;searchword\&quot;:\&quot;rtsp\&quot;}&quot;}" data-report-view="{&quot;mod&quot;:&quot;popu_626&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4223&quot;,&quot;strategy&quot;:&quot;rtsp&quot;,&quot;ab&quot;:&quot;new&quot;,&quot;extra&quot;:&quot;{\&quot;searchword\&quot;:\&quot;rtsp\&quot;}&quot;}" class="tag-link" href="https://so.csdn.net/so/search/s.do?q=rtsp&amp;t=all&amp;o=vip&amp;s=&amp;l=&amp;f=&amp;viparticle=&amp;from_tracking_code=tag_word&amp;from_code=app_blog_art" target="_blank">rtsp</a> 
+           <a rel="noopener" data-report-query="spm=1001.2101.3001.4223" data-report-click="{&quot;mod&quot;:&quot;popu_626&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4223&quot;,&quot;strategy&quot;:&quot;流媒体&quot;,&quot;ab&quot;:&quot;new&quot;,&quot;extra&quot;:&quot;{\&quot;searchword\&quot;:\&quot;流媒体\&quot;}&quot;}" data-report-view="{&quot;mod&quot;:&quot;popu_626&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4223&quot;,&quot;strategy&quot;:&quot;流媒体&quot;,&quot;ab&quot;:&quot;new&quot;,&quot;extra&quot;:&quot;{\&quot;searchword\&quot;:\&quot;流媒体\&quot;}&quot;}" class="tag-link" href="https://so.csdn.net/so/search/s.do?q=%E6%B5%81%E5%AA%92%E4%BD%93&amp;t=all&amp;o=vip&amp;s=&amp;l=&amp;f=&amp;viparticle=&amp;from_tracking_code=tag_word&amp;from_code=app_blog_art" target="_blank">流媒体</a> 
+           <a rel="noopener" data-report-query="spm=1001.2101.3001.4223" data-report-click="{&quot;mod&quot;:&quot;popu_626&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4223&quot;,&quot;strategy&quot;:&quot;H.264&quot;,&quot;ab&quot;:&quot;new&quot;,&quot;extra&quot;:&quot;{\&quot;searchword\&quot;:\&quot;H.264\&quot;}&quot;}" data-report-view="{&quot;mod&quot;:&quot;popu_626&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4223&quot;,&quot;strategy&quot;:&quot;H.264&quot;,&quot;ab&quot;:&quot;new&quot;,&quot;extra&quot;:&quot;{\&quot;searchword\&quot;:\&quot;H.264\&quot;}&quot;}" class="tag-link" href="https://so.csdn.net/so/search/s.do?q=H.264&amp;t=all&amp;o=vip&amp;s=&amp;l=&amp;f=&amp;viparticle=&amp;from_tracking_code=tag_word&amp;from_code=app_blog_art" target="_blank">H.264</a> 
+           <a rel="noopener" data-report-query="spm=1001.2101.3001.4223" data-report-click="{&quot;mod&quot;:&quot;popu_626&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4223&quot;,&quot;strategy&quot;:&quot;多播&quot;,&quot;ab&quot;:&quot;new&quot;,&quot;extra&quot;:&quot;{\&quot;searchword\&quot;:\&quot;多播\&quot;}&quot;}" data-report-view="{&quot;mod&quot;:&quot;popu_626&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4223&quot;,&quot;strategy&quot;:&quot;多播&quot;,&quot;ab&quot;:&quot;new&quot;,&quot;extra&quot;:&quot;{\&quot;searchword\&quot;:\&quot;多播\&quot;}&quot;}" class="tag-link" href="https://so.csdn.net/so/search/s.do?q=%E5%A4%9A%E6%92%AD&amp;t=all&amp;o=vip&amp;s=&amp;l=&amp;f=&amp;viparticle=&amp;from_tracking_code=tag_word&amp;from_code=app_blog_art" target="_blank">多播</a> 
+          </div> 
+         </div> 
+         <div class="slide-content-box"> 
+          <div class="article-copyright"> 
+           <div class="creativecommons">
+             版权声明：本文为博主原创文章，遵循
+            <a href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener"> CC 4.0 BY-SA </a>版权协议，转载请附上原文出处链接和本声明。 
+           </div> 
+           <div class="article-source-link">
+             本文链接：
+            <a href="https://blog.csdn.net/weixin_42462202/article/details/99413781" target="_blank">https://blog.csdn.net/weixin_42462202/article/details/99413781</a> 
+           </div> 
+          </div> 
+         </div> 
+         <div class="operating"> 
+          <a class="href-article-edit slide-toggle">版权</a> 
+         </div> 
+        </div> 
+       </div> 
+      </div> 
+      <div id="blogHuaweiyunAdvert"></div> 
+      <article class="baidu_pl"> 
+       <div id="article_content" class="article_content clearfix"> 
+        <link rel="stylesheet" href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/kdoc_html_views-1a98987dfd.css"> 
+        <link rel="stylesheet" href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/ck_htmledit_views-704d5b9767.css"> 
+        <div id="content_views" class="markdown_views prism-atom-one-light"> 
+         <svg xmlns="http://www.w3.org/2000/svg" style="display: none;"> 
+          <path stroke-linecap="round" d="M5,0 0,2.5 5,5z" id="raphael-marker-block" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path> 
+         </svg> 
+         <p><strong>从零开始写一个RTSP服务器系列</strong></p> 
+         <p><a href="https://blog.csdn.net/weixin_42462202/article/details/98956346">★我的开源项目-RtspServer</a></p> 
+         <p><a href="https://blog.csdn.net/weixin_42462202/article/details/98986535">从零开始写一个RTSP服务器（一）RTSP协议讲解</a></p> 
+         <p><a href="https://blog.csdn.net/weixin_42462202/article/details/99068041">从零开始写一个RTSP服务器（二）RTSP协议的实现</a></p> 
+         <p><a href="https://blog.csdn.net/weixin_42462202/article/details/99089020">从零开始写一个RTSP服务器（三）RTP传输H.264</a></p> 
+         <p><a href="https://blog.csdn.net/weixin_42462202/article/details/99111635">从零开始写一个RTSP服务器（四）一个传输H.264的RTSP服务器</a></p> 
+         <p><a href="https://blog.csdn.net/weixin_42462202/article/details/99200935">从零开始写一个RTSP服务器（五）RTP传输AAC</a></p> 
+         <p><a href="https://blog.csdn.net/weixin_42462202/article/details/99311193">从零开始写一个RTSP服务器（六）一个传输AAC的RTSP服务器</a></p> 
+         <p><a href="https://blog.csdn.net/weixin_42462202/article/details/99329048">从零开始写一个RTSP服务器（七）多播传输RTP包</a></p> 
+         <p><a href="https://blog.csdn.net/weixin_42462202/article/details/99413781">从零开始写一个RTSP服务器（八）一个多播的RTSP服务器</a></p> 
+         <p><a href="https://blog.csdn.net/weixin_42462202/article/details/99442338">从零开始写一个RTSP服务器（九）一个RTP OVER RTSP/TCP的RTSP服务器</a></p> 
+         <h2><a id="RTSPRTSP_22"></a>从零开始写一个RTSP服务器（八）一个多播的RTSP服务器</h2> 
+         <p></p> 
+         <div class="toc"> 
+          <h4>文章目录</h4> 
+          <ul>
+           <li><a href="#RTSPRTSP_22" rel="nofollow">从零开始写一个RTSP服务器（八）一个多播的RTSP服务器</a></li>
+           <li>
+            <ul>
+             <li><a href="#RTSP_27" rel="nofollow">一、多播的RTSP交互过程</a></li>
+             <li><a href="#RTSP_148" rel="nofollow">二、多播的RTSP服务器实现过程</a></li>
+             <li>
+              <ul>
+               <li><a href="#21__150" rel="nofollow">2.1 创建套接字</a></li>
+               <li><a href="#22_RTP_181" rel="nofollow">2.2 创建线程向多播地址推送RTP包</a></li>
+               <li><a href="#22__225" rel="nofollow">2.2 接收客户端连接</a></li>
+               <li><a href="#23__247" rel="nofollow">2.3 解析命令</a></li>
+               <li><a href="#24__287" rel="nofollow">2.4 处理请求</a></li>
+               <li><a href="#_371" rel="nofollow">源码</a></li>
+               <li>
+                <ul>
+                 <li><a href="#multicast_rtsp_serverc_375" rel="nofollow">multicast_rtsp_server.c</a></li>
+                 <li><a href="#rtph_903" rel="nofollow">rtp.h</a></li>
+                 <li><a href="#rtpc_975" rel="nofollow">rtp.c</a></li>
+                </ul> </li>
+              </ul> </li>
+             <li><a href="#_1030" rel="nofollow">三、测试</a></li>
+            </ul> </li>
+          </ul> 
+         </div> 
+         <br> 
+         <strong>本文目的</strong>：实现一个多播传输H.264的RTSP服务器 
+         <p></p> 
+         <h3><a id="RTSP_27"></a>一、多播的RTSP交互过程</h3> 
+         <p>我们在前面文章<a href="https://blog.csdn.net/weixin_42462202/article/details/99068041">从零开始写一个RTSP服务器（二）RTSP协议的实现</a>中实现的RTSP交互过程是RTSP单播的情况，多播的实现过程与单播还是有所区别的，多播并不需要为每一个RTP和RTCP建立新的UDP套接字，只需要持续向一个多播地址推送RTP包就行，下面来看一个RTSP多播交互的示例</p> 
+         <p><strong>OPTIONS</strong></p> 
+         <ul>
+          <li> <p>C–&gt;S</p> <pre><code>OPTIONS rtsp://127.0.0.1:8554/live RTSP/1.0\r\n
+CSeq: 2\r\n
+\r\n
+</code ></pre> </li>
+          <li> <p>S–&gt;C</p> <pre><code>RTSP/1.0 200 OK\r\n
+CSeq: 2\r\n
+Public: OPTIONS, DESCRIBE, SETUP, TEARDOWN, PLAY\r\n
+\r\n
+</code ></pre> </li>
+         </ul> 
+         <p><strong>DESCRIBE</strong></p> 
+         <ul>
+          <li> <p>C–&gt;S</p> <pre><code>DESCRIBE rtsp://127.0.0.1:8554/live RTSP/1.0\r\n
+CSeq: 3\r\n
+Accept: application/sdp\r\n
+\r\n
+</code ></pre> </li>
+          <li> <p>S—&gt;C</p> <pre><code  style="height: 50vh;">RTSP/1.0 200 OK\r\n
+CSeq: 3\r\n
+Content-length: 225\r\n
+Content-type: application/sdp\r\n
+\r\n
+v=0
+o=- 91565615172 1 IN IP4 127.0.0.1
+t=0 0
+a=control:*
+a=type:broadcast
+a=rtcp-unicast: reflection
+m=video 39016 RTP/AVP 96
+c=IN IP4 232.123.86.248/255
+a=rtpmap:96 H264/90000
+a=framerate:25
+a=control:track0
+</code ></pre> <p>这个sdp描述文件里指明了多播地址和多播端口</p> 
+           <ul>
+            <li> <p>这一行表明RTCP反馈采用单播</p> <pre><code>a=rtcp-unicast: reflection
+</code ></pre> <p>在多播的情况下，这表明服务端RTP发送到多播组，RTCP发送到多播组，RTCP接收采用单播</p> </li>
+            <li> <p>这一行表明的多播目的端口为39016</p> <pre><code>m=video 39016 RTP/AVP 96
+</code ></pre> </li>
+            <li> <p>这一行表明了多播地址为<code>c=IN IP4 232.123.86.248/255</code ></p> <pre><code>c=IN IP4 232.123.86.248/255
+</code ></pre> </li>
+           </ul> </li>
+         </ul> 
+         <p>多播和单播的sdp文件区别主要是多播需要指定好多播地址和多播端口</p> 
+         <p>关于sdp这里就不再详细讲述了，如何有不清楚请看前面的文章</p> 
+         <p><strong>SETUP</strong></p> 
+         <ul>
+          <li> <p>C–&gt;S</p> <pre><code>SETUP rtsp://127.0.0.1:8554/live/track0 RTSP/1.0\r\n
+CSeq: 4\r\n
+Transport: RTP/AVP;multicast;client_port=39016-39017
+\r\n
+</code ></pre> </li>
+          <li> <p>S–&gt;C</p> <pre><code>RTSP/1.0 200 OK\r\n
+CSeq: 4\r\n
+Transport: RTP/AVP;multicast;destination=232.123.86.248;source=192.168.31.115;port=39016-39017;ttl=255
+Session: 66334873
+\r\n
+</code ></pre> </li>
+         </ul> 
+         <p><strong>PLAY</strong></p> 
+         <ul>
+          <li> <p>C–&gt;S</p> <pre><code>PLAY rtsp://127.0.0.1:8554/live RTSP/1.0\r\n
+CSeq: 5\r\n
+Session: 66334873
+Range: npt=0.000-\r\n
+\r\n
+</code ></pre> </li>
+          <li> <p>S–&gt;C</p> <pre><code>RTSP/1.0 200 OK\r\n
+CSeq: 5\r\n
+Range: npt=0.000-\r\n
+Session: 66334873; timeout=60
+\r\n
+</code ></pre> </li>
+         </ul> 
+         <h3><a id="RTSP_148"></a>二、多播的RTSP服务器实现过程</h3> 
+         <h4><a id="21__150"></a>2.1 创建套接字</h4> 
+         <pre><code  style="height: 50vh;" class="prism language-c"><span class="token comment">/*
+ * 作者：_JT_
+ * 博客：https://blog.csdn.net/weixin_42462202
+ */</span>
+
+<span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{
+            <!-- --></span>
+    <span class="token comment">/* 创建套接字 */</span>
+	serverSockfd <span class="token operator">=</span> <span class="token function">createTcpSocket</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>    
+
+    <span class="token comment">/* 绑定地址和端口 */</span>
+	<span class="token function">bindSocketAddr</span><span class="token punctuation">(</span>serverSockfd<span class="token punctuation">,</span> <span class="token string">"0.0.0.0"</span><span class="token punctuation">,</span> SERVER_PORT<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    
+    <span class="token comment">/* 开始监听 */</span>
+    <span class="token function">listen</span><span class="token punctuation">(</span>serverSockfd<span class="token punctuation">,</span> <span class="token number">10</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    
+    <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+    
+    <span class="token keyword">while</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span>
+    <span class="token punctuation">{
+            <!-- --></span>
+        <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+
+
+</code ></pre> 
+         <h4><a id="22_RTP_181"></a>2.2 创建线程向多播地址推送RTP包</h4> 
+         <p>在进入while循环接收客户端前，我们创建一个线程不断地向多播地址发送RTP包</p> 
+         <pre><code class="prism language-c"><span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{
+            <!-- --></span>
+    <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+    <span class="token function">pthread_create</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>threadId<span class="token punctuation">,</span> <span class="token constant">NULL</span><span class="token punctuation">,</span> sendRtpPacket<span class="token punctuation">,</span> <span class="token constant">NULL</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    
+    <span class="token keyword">while</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span>
+    <span class="token punctuation">{
+            <!-- --></span>
+        <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code ></pre> 
+         <p>下面看一看发送函数</p> 
+         <pre><code  style="height: 50vh;" class="prism language-c"><span class="token comment">/*
+ * 作者：_JT_
+ * 博客：https://blog.csdn.net/weixin_42462202
+ */</span>
+
+<span class="token function">sendRtpPacket</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{
+            <!-- --></span>
+    <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+    <span class="token keyword">while</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span>
+    <span class="token punctuation">{
+            <!-- --></span>
+        <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+            
+        <span class="token comment">/* 获取一帧数据 */</span>
+       	<span class="token function">getFrameFromH264File</span><span class="token punctuation">(</span>fd<span class="token punctuation">,</span> frame<span class="token punctuation">,</span> <span class="token number">500000</span><span class="token punctuation">)</span><span class="token punctuation">;</span> 
+        
+        <span class="token comment">/* 向多播地址发送RTP包 */</span>
+        <span class="token function">rtpSendH264Frame</span><span class="token punctuation">(</span>sockfd<span class="token punctuation">,</span> MULTICAST_IP<span class="token punctuation">,</span> MULTICAST_PORT<span class="token punctuation">,</span>
+                            rtpPacket<span class="token punctuation">,</span> frame<span class="token operator">+</span>startCode<span class="token punctuation">,</span> frameSize<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        
+        <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code ></pre> 
+         <h4><a id="22__225"></a>2.2 接收客户端连接</h4> 
+         <p>进入while循环后，开始接收客户端，然后处理客户端请求</p> 
+         <pre><code  style="height: 50vh;" class="prism language-c"><span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{
+            <!-- --></span>
+    <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+        
+    <span class="token keyword">while</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span>
+    <span class="token punctuation">{
+            <!-- --></span>
+        <span class="token comment">/* 接收客户端 */</span>
+        <span class="token function">acceptClient</span><span class="token punctuation">(</span>serverSockfd<span class="token punctuation">,</span> clientIp<span class="token punctuation">,</span> <span class="token operator">&amp;</span>clientPort<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        
+        <span class="token comment">/* 处理客户端 */</span>
+        <span class="token function">doClient</span><span class="token punctuation">(</span>clientSockfd<span class="token punctuation">,</span> clientIp<span class="token punctuation">,</span> clientPort<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code ></pre> 
+         <p>下面仔细看一看如何处理客户端请求</p> 
+         <h4><a id="23__247"></a>2.3 解析命令</h4> 
+         <p>先解析请求方法，然后解析序列号，再根据不同地请求做不同的处理，然后再放回结果给客户端</p> 
+         <pre><code  style="height: 50vh;" class="prism language-c"><span class="token comment">/*
+ * 作者：_JT_
+ * 博客：https://blog.csdn.net/weixin_42462202
+ */</span>
+
+<span class="token function">doClient</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{
+            <!-- --></span>
+    <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+    <span class="token keyword">while</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span>
+    <span class="token punctuation">{
+            <!-- --></span>
+		<span class="token comment">/* 接收请求 */</span>
+    	<span class="token function">recv</span><span class="token punctuation">(</span>clientSockfd<span class="token punctuation">,</span> rBuf<span class="token punctuation">,</span> BUF_MAX_SIZE<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    	<span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+        <span class="token comment">/* 解析请求方法 */</span>
+        <span class="token function">sscanf</span><span class="token punctuation">(</span>line<span class="token punctuation">,</span> <span class="token string">"%s %s %s\r\n"</span><span class="token punctuation">,</span> method<span class="token punctuation">,</span> url<span class="token punctuation">,</span> version<span class="token punctuation">)</span>
+        <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> 
+        <span class="token comment">/* 解析序列号 */</span>
+        <span class="token function">sscanf</span><span class="token punctuation">(</span>line<span class="token punctuation">,</span> <span class="token string">"CSeq: %d\r\n"</span><span class="token punctuation">,</span> <span class="token operator">&amp;</span>cseq<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        
+        <span class="token comment">/* 处理请求 */</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token operator">!</span><span class="token function">strcmp</span><span class="token punctuation">(</span>method<span class="token punctuation">,</span> <span class="token string">"OPTIONS"</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+            <span class="token function">handleCmd_OPTIONS</span><span class="token punctuation">(</span>sBuf<span class="token punctuation">,</span> cseq<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">else</span> <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token operator">!</span><span class="token function">strcmp</span><span class="token punctuation">(</span>method<span class="token punctuation">,</span> <span class="token string">"DESCRIBE"</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+            <span class="token function">handleCmd_DESCRIBE</span><span class="token punctuation">(</span>sBuf<span class="token punctuation">,</span> cseq<span class="token punctuation">,</span> url<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">else</span> <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token operator">!</span><span class="token function">strcmp</span><span class="token punctuation">(</span>method<span class="token punctuation">,</span> <span class="token string">"SETUP"</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+            <span class="token function">handleCmd_SETUP</span><span class="token punctuation">(</span>sBuf<span class="token punctuation">,</span> cseq<span class="token punctuation">,</span> localIp<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">else</span> <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token operator">!</span><span class="token function">strcmp</span><span class="token punctuation">(</span>method<span class="token punctuation">,</span> <span class="token string">"PLAY"</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+            <span class="token function">handleCmd_PLAY</span><span class="token punctuation">(</span>sBuf<span class="token punctuation">,</span> cseq<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    
+        <span class="token comment">/* 返回结果给客户端 */</span>
+    	<span class="token function">send</span><span class="token punctuation">(</span>clientSockfd<span class="token punctuation">,</span> sBuf<span class="token punctuation">,</span> <span class="token function">strlen</span><span class="token punctuation">(</span>sBuf<span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code ></pre> 
+         <h4><a id="24__287"></a>2.4 处理请求</h4> 
+         <ul>
+          <li> <p>OPTIONS</p> <pre><code class="prism language-c"><span class="token function">handleCmd_OPTIONS</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{
+              <!-- --></span>
+    <span class="token function">sprintf</span><span class="token punctuation">(</span>result<span class="token punctuation">,</span> <span class="token string">"RTSP/1.0 200 OK\r\n"</span>
+                    <span class="token string">"CSeq: %d\r\n"</span>
+                    <span class="token string">"Public: OPTIONS, DESCRIBE, SETUP, PLAY\r\n"</span>
+                    <span class="token string">"\r\n"</span><span class="token punctuation">,</span>
+                    cseq<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code ></pre> </li>
+          <li> <p>DESCRIBE</p> <p>发送多播的sdp描述文件</p> <pre><code  style="height: 50vh;" class="prism language-c"><span class="token function">handleCmd_DESCRIBE</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{
+              <!-- --></span>
+    <span class="token comment">/* 多播sdp */</span>
+    <span class="token function">sprintf</span><span class="token punctuation">(</span>sdp<span class="token punctuation">,</span> <span class="token string">"v=0\r\n"</span>
+                 <span class="token string">"o=- 9%ld 1 IN IP4 %s\r\n"</span>
+                 <span class="token string">"t=0 0\r\n"</span>
+                 <span class="token string">"a=control:*\r\n"</span>
+                 <span class="token string">"a=type:broadcast\r\n"</span>
+                 <span class="token string">"a=rtcp-unicast: reflection\r\n"</span>
+                 <span class="token string">"m=video %d RTP/AVP 96\r\n"</span>
+                 <span class="token string">"c=IN IP4 %s/255\r\n"</span>
+                 <span class="token string">"a=rtpmap:96 H264/90000\r\n"</span>
+                 <span class="token string">"a=control:track0\r\n"</span><span class="token punctuation">,</span>
+                 <span class="token function">time</span><span class="token punctuation">(</span><span class="token constant">NULL</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+                 localIp<span class="token punctuation">,</span>
+                 MULTICAST_PORT<span class="token punctuation">,</span>
+                 MULTICAST_IP<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                 
+    <span class="token function">sprintf</span><span class="token punctuation">(</span>result<span class="token punctuation">,</span> <span class="token string">"RTSP/1.0 200 OK\r\nCSeq: %d\r\n"</span>
+                    <span class="token string">"Content-Base: %s\r\n"</span>
+                    <span class="token string">"Content-type: application/sdp\r\n"</span>
+                    <span class="token string">"Content-length: %d\r\n\r\n"</span>
+                    <span class="token string">"%s"</span><span class="token punctuation">,</span>
+                    cseq<span class="token punctuation">,</span>
+                    url<span class="token punctuation">,</span>
+                    <span class="token function">strlen</span><span class="token punctuation">(</span>sdp<span class="token punctuation">)</span><span class="token punctuation">,</span>
+                    sdp<span class="token punctuation">)</span><span class="token punctuation">;</span> 
+<span class="token punctuation">}</span>
+</code ></pre> </li>
+          <li> <p>SETUP</p> <pre><code  style="height: 50vh;" class="prism language-c"><span class="token function">handleCmd_SETUP</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{
+              <!-- --></span>
+   <span class="token function">sprintf</span><span class="token punctuation">(</span>result<span class="token punctuation">,</span> <span class="token string">"RTSP/1.0 200 OK\r\n"</span>
+                    <span class="token string">"CSeq: %d\r\n"</span>
+                    <span class="token string">"Transport: RTP/AVP;multicast;destination=%s;"</span>
+           			<span class="token string">"source=%s;port=%d-	%d;ttl=255\r\n"</span>
+                    <span class="token string">"Session: 66334873\r\n"</span>
+                    <span class="token string">"\r\n"</span><span class="token punctuation">,</span>
+                    cseq<span class="token punctuation">,</span>
+                    MULTICAST_IP<span class="token punctuation">,</span>
+                    localIp<span class="token punctuation">,</span>
+                    MULTICAST_PORT<span class="token punctuation">,</span>
+                    MULTICAST_PORT<span class="token operator">+</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code ></pre> </li>
+          <li> <p>PLAY</p> <pre><code class="prism language-c"><span class="token function">handleCmd_PLAY</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{
+              <!-- --></span>
+    <span class="token function">sprintf</span><span class="token punctuation">(</span>result<span class="token punctuation">,</span> <span class="token string">"RTSP/1.0 200 OK\r\n"</span>
+                    <span class="token string">"CSeq: %d\r\n"</span>
+                    <span class="token string">"Range: npt=0.000-\r\n"</span>
+                    <span class="token string">"Session: 66334873; timeout=60\r\n\r\n"</span><span class="token punctuation">,</span>
+                    cseq<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code ></pre> <p>在play回复完成之后，客户端就会去多播地址拉取媒体流，然后播放</p> </li>
+         </ul> 
+         <h4><a id="_371"></a>源码</h4> 
+         <p>源码有三个文件：<code>multicast_rtsp_server</code >、<code>rtp.h</code >、<code>rtp.c</code ></p> 
+         <h5><a id="multicast_rtsp_serverc_375"></a>multicast_rtsp_server.c</h5> 
+         <pre><code  style="height: 50vh;" class="prism language-c"><span class="token comment">/*
+ * 作者：_JT_
+ * 博客：https://blog.csdn.net/weixin_42462202
+ */</span>
+
+<span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">&lt;stdio.h&gt;</span></span>
+<span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">&lt;stdlib.h&gt;</span></span>
+<span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">&lt;stdint.h&gt;</span></span>
+<span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">&lt;string.h&gt;</span></span>
+<span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">&lt;sys/types.h&gt;</span></span>
+<span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">&lt;sys/socket.h&gt;</span></span>
+<span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">&lt;sys/socket.h&gt;</span></span>
+<span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">&lt;netinet/in.h&gt;</span></span>
+<span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">&lt;arpa/inet.h&gt;</span></span>
+<span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">&lt;time.h&gt;</span></span>
+<span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">&lt;sys/types.h&gt;</span></span>
+<span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">&lt;sys/stat.h&gt;</span></span>
+<span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">&lt;fcntl.h&gt;</span></span>
+<span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">&lt;assert.h&gt;</span></span>
+<span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">&lt;pthread.h&gt;</span></span>
+
+<span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">"rtp.h"</span></span>
+
+<span class="token macro property">#<span class="token directive keyword">define</span> H264_FILE_NAME      "test.h264"</span>
+<span class="token macro property">#<span class="token directive keyword">define</span> MULTICAST_IP        "239.255.255.11"</span>
+<span class="token macro property">#<span class="token directive keyword">define</span> SERVER_PORT         8554</span>
+<span class="token macro property">#<span class="token directive keyword">define</span> MULTICAST_PORT      9832</span>
+<span class="token macro property">#<span class="token directive keyword">define</span> BUF_MAX_SIZE        (1024*1024)</span>
+
+<span class="token keyword">static</span> <span class="token keyword">int</span> <span class="token function">createTcpSocket</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{
+            <!-- --></span>
+    <span class="token keyword">int</span> sockfd<span class="token punctuation">;</span>
+    <span class="token keyword">int</span> on <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>
+
+    sockfd <span class="token operator">=</span> <span class="token function">socket</span><span class="token punctuation">(</span>AF_INET<span class="token punctuation">,</span> SOCK_STREAM<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span><span class="token punctuation">(</span>sockfd <span class="token operator">&lt;</span> <span class="token number">0</span><span class="token punctuation">)</span>
+        <span class="token keyword">return</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
+
+    <span class="token function">setsockopt</span><span class="token punctuation">(</span>sockfd<span class="token punctuation">,</span> SOL_SOCKET<span class="token punctuation">,</span> SO_REUSEADDR<span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token keyword">const</span> <span class="token keyword">char</span><span class="token operator">*</span><span class="token punctuation">)</span><span class="token operator">&amp;</span>on<span class="token punctuation">,</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span>on<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">return</span> sockfd<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">static</span> <span class="token keyword">int</span> <span class="token function">createUdpSocket</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">{
+            <!-- --></span>
+    <span class="token keyword">int</span> sockfd<span class="token punctuation">;</span>
+    <span class="token keyword">int</span> on <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>
+
+    sockfd <span class="token operator">=</span> <span class="token function">socket</span><span class="token punctuation">(</span>AF_INET<span class="token punctuation">,</span> SOCK_DGRAM<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span><span class="token punctuation">(</span>sockfd <span class="token operator">&lt;</span> <span class="token number">0</span><span class="token punctuation">)</span>
+        <span class="token keyword">return</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
+
+    <span class="token function">setsockopt</span><span class="token punctuation">(</span>sockfd<span class="token punctuation">,</span> SOL_SOCKET<span class="token punctuation">,</span> SO_REUSEADDR<span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token keyword">const</span> <span class="token keyword">char</span><span class="token operator">*</span><span class="token punctuation">)</span><span class="token operator">&amp;</span>on<span class="token punctuation">,</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span>on<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">return</span> sockfd<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">static</span> <span class="token keyword">int</span> <span class="token function">bindSocketAddr</span><span class="token punctuation">(</span><span class="token keyword">int</span> sockfd<span class="token punctuation">,</span> <span class="token keyword">const</span> <span class="token keyword">char</span><span class="token operator">*</span> ip<span class="token punctuation">,</span> <span class="token keyword">int</span> port<span class="token punctuation">)</span>
+<span class="token punctuation">{
+            <!-- --></span>
+    <span class="token keyword">struct</span> sockaddr_in addr<span class="token punctuation">;</span>
+
+    addr<span class="token punctuation">.</span>sin_family <span class="token operator">=</span> AF_INET<span class="token punctuation">;</span>
+    addr<span class="token punctuation">.</span>sin_port <span class="token operator">=</span> <span class="token function">htons</span><span class="token punctuation">(</span>port<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    addr<span class="token punctuation">.</span>sin_addr<span class="token punctuation">.</span>s_addr <span class="token operator">=</span> <span class="token function">inet_addr</span><span class="token punctuation">(</span>ip<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token function">bind</span><span class="token punctuation">(</span>sockfd<span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token keyword">struct</span> sockaddr <span class="token operator">*</span><span class="token punctuation">)</span><span class="token operator">&amp;</span>addr<span class="token punctuation">,</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span><span class="token keyword">struct</span> sockaddr<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">&lt;</span> <span class="token number">0</span><span class="token punctuation">)</span>
+        <span class="token keyword">return</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">static</span> <span class="token keyword">int</span> <span class="token function">acceptClient</span><span class="token punctuation">(</span><span class="token keyword">int</span> sockfd<span class="token punctuation">,</span> <span class="token keyword">char</span><span class="token operator">*</span> ip<span class="token punctuation">,</span> <span class="token keyword">int</span><span class="token operator">*</span> port<span class="token punctuation">)</span>
+<span class="token punctuation">{
+            <!-- --></span>
+    <span class="token keyword">int</span> clientfd<span class="token punctuation">;</span>
+    socklen_t len <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    <span class="token keyword">struct</span> sockaddr_in addr<span class="token punctuation">;</span>
+
+    <span class="token function">memset</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>addr<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span>addr<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    len <span class="token operator">=</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span>addr<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    clientfd <span class="token operator">=</span> <span class="token function">accept</span><span class="token punctuation">(</span>sockfd<span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token keyword">struct</span> sockaddr <span class="token operator">*</span><span class="token punctuation">)</span><span class="token operator">&amp;</span>addr<span class="token punctuation">,</span> <span class="token operator">&amp;</span>len<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span><span class="token punctuation">(</span>clientfd <span class="token operator">&lt;</span> <span class="token number">0</span><span class="token punctuation">)</span>
+        <span class="token keyword">return</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
+    
+    <span class="token function">strcpy</span><span class="token punctuation">(</span>ip<span class="token punctuation">,</span> <span class="token function">inet_ntoa</span><span class="token punctuation">(</span>addr<span class="token punctuation">.</span>sin_addr<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token operator">*</span>port <span class="token operator">=</span> <span class="token function">ntohs</span><span class="token punctuation">(</span>addr<span class="token punctuation">.</span>sin_port<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">return</span> clientfd<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">static</span> <span class="token keyword">inline</span> <span class="token keyword">int</span> <span class="token function">startCode3</span><span class="token punctuation">(</span><span class="token keyword">char</span><span class="token operator">*</span> buf<span class="token punctuation">)</span>
+<span class="token punctuation">{
+            <!-- --></span>
+    <span class="token keyword">if</span><span class="token punctuation">(</span>buf<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span> <span class="token operator">==</span> <span class="token number">0</span> <span class="token operator">&amp;&amp;</span> buf<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">==</span> <span class="token number">0</span> <span class="token operator">&amp;&amp;</span> buf<span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">]</span> <span class="token operator">==</span> <span class="token number">1</span><span class="token punctuation">)</span>
+        <span class="token keyword">return</span> <span class="token number">1</span><span class="token punctuation">;</span>
+    <span class="token keyword">else</span>
+        <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">static</span> <span class="token keyword">inline</span> <span class="token keyword">int</span> <span class="token function">startCode4</span><span class="token punctuation">(</span><span class="token keyword">char</span><span class="token operator">*</span> buf<span class="token punctuation">)</span>
+<span class="token punctuation">{
+            <!-- --></span>
+    <span class="token keyword">if</span><span class="token punctuation">(</span>buf<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span> <span class="token operator">==</span> <span class="token number">0</span> <span class="token operator">&amp;&amp;</span> buf<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">==</span> <span class="token number">0</span> <span class="token operator">&amp;&amp;</span> buf<span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">]</span> <span class="token operator">==</span> <span class="token number">0</span> <span class="token operator">&amp;&amp;</span> buf<span class="token punctuation">[</span><span class="token number">3</span><span class="token punctuation">]</span> <span class="token operator">==</span> <span class="token number">1</span><span class="token punctuation">)</span>
+        <span class="token keyword">return</span> <span class="token number">1</span><span class="token punctuation">;</span>
+    <span class="token keyword">else</span>
+        <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">static</span> <span class="token keyword">char</span><span class="token operator">*</span> <span class="token function">findNextStartCode</span><span class="token punctuation">(</span><span class="token keyword">char</span><span class="token operator">*</span> buf<span class="token punctuation">,</span> <span class="token keyword">int</span> len<span class="token punctuation">)</span>
+<span class="token punctuation">{
+            <!-- --></span>
+    <span class="token keyword">int</span> i<span class="token punctuation">;</span>
+
+    <span class="token keyword">if</span><span class="token punctuation">(</span>len <span class="token operator">&lt;</span> <span class="token number">3</span><span class="token punctuation">)</span>
+        <span class="token keyword">return</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">for</span><span class="token punctuation">(</span>i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> len<span class="token operator">-</span><span class="token number">3</span><span class="token punctuation">;</span> <span class="token operator">++</span>i<span class="token punctuation">)</span>
+    <span class="token punctuation">{
+            <!-- --></span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token function">startCode3</span><span class="token punctuation">(</span>buf<span class="token punctuation">)</span> <span class="token operator">||</span> <span class="token function">startCode4</span><span class="token punctuation">(</span>buf<span class="token punctuation">)</span><span class="token punctuation">)</span>
+            <span class="token keyword">return</span> buf<span class="token punctuation">;</span>
+        
+        <span class="token operator">++</span>buf<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token function">startCode3</span><span class="token punctuation">(</span>buf<span class="token punctuation">)</span><span class="token punctuation">)</span>
+        <span class="token keyword">return</span> buf<span class="token punctuation">;</span>
+
+    <span class="token keyword">return</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">static</span> <span class="token keyword">int</span> <span class="token function">getFrameFromH264File</span><span class="token punctuation">(</span><span class="token keyword">int</span> fd<span class="token punctuation">,</span> <span class="token keyword">char</span><span class="token operator">*</span> frame<span class="token punctuation">,</span> <span class="token keyword">int</span> size<span class="token punctuation">)</span>
+<span class="token punctuation">{
+            <!-- --></span>
+    <span class="token keyword">int</span> rSize<span class="token punctuation">,</span> frameSize<span class="token punctuation">;</span>
+    <span class="token keyword">char</span><span class="token operator">*</span> nextStartCode<span class="token punctuation">;</span>
+
+    <span class="token keyword">if</span><span class="token punctuation">(</span>fd <span class="token operator">&lt;</span> <span class="token number">0</span><span class="token punctuation">)</span>
+        <span class="token keyword">return</span> fd<span class="token punctuation">;</span>
+
+    rSize <span class="token operator">=</span> <span class="token function">read</span><span class="token punctuation">(</span>fd<span class="token punctuation">,</span> frame<span class="token punctuation">,</span> size<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token operator">!</span><span class="token function">startCode3</span><span class="token punctuation">(</span>frame<span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span> <span class="token operator">!</span><span class="token function">startCode4</span><span class="token punctuation">(</span>frame<span class="token punctuation">)</span><span class="token punctuation">)</span>
+        <span class="token keyword">return</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
+    
+    nextStartCode <span class="token operator">=</span> <span class="token function">findNextStartCode</span><span class="token punctuation">(</span>frame<span class="token operator">+</span><span class="token number">3</span><span class="token punctuation">,</span> rSize<span class="token operator">-</span><span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token operator">!</span>nextStartCode<span class="token punctuation">)</span>
+    <span class="token punctuation">{
+            <!-- --></span>
+        <span class="token function">lseek</span><span class="token punctuation">(</span>fd<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token constant">SEEK_SET</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        frameSize <span class="token operator">=</span> rSize<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">else</span>
+    <span class="token punctuation">{
+            <!-- --></span>
+        frameSize <span class="token operator">=</span> <span class="token punctuation">(</span>nextStartCode<span class="token operator">-</span>frame<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token function">lseek</span><span class="token punctuation">(</span>fd<span class="token punctuation">,</span> frameSize<span class="token operator">-</span>rSize<span class="token punctuation">,</span> <span class="token constant">SEEK_CUR</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token keyword">return</span> frameSize<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">static</span> <span class="token keyword">int</span> <span class="token function">rtpSendH264Frame</span><span class="token punctuation">(</span><span class="token keyword">int</span> socket<span class="token punctuation">,</span> <span class="token keyword">const</span> <span class="token keyword">char</span><span class="token operator">*</span> ip<span class="token punctuation">,</span> int16_t port<span class="token punctuation">,</span>
+                            <span class="token keyword">struct</span> RtpPacket<span class="token operator">*</span> rtpPacket<span class="token punctuation">,</span> uint8_t<span class="token operator">*</span> frame<span class="token punctuation">,</span> uint32_t frameSize<span class="token punctuation">)</span>
+<span class="token punctuation">{
+            <!-- --></span>
+    uint8_t naluType<span class="token punctuation">;</span> <span class="token comment">// nalu第一个字节</span>
+    <span class="token keyword">int</span> sendBytes <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    <span class="token keyword">int</span> ret<span class="token punctuation">;</span>
+
+    naluType <span class="token operator">=</span> frame<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>frameSize <span class="token operator">&lt;=</span> RTP_MAX_PKT_SIZE<span class="token punctuation">)</span> <span class="token comment">// nalu长度小于最大包场：单一NALU单元模式</span>
+    <span class="token punctuation">{
+            <!-- --></span>
+        <span class="token comment">/*
+         *   0 1 2 3 4 5 6 7 8 9
+         *  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+         *  |F|NRI|  Type   | a single NAL unit ... |
+         *  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+         */</span>
+        <span class="token function">memcpy</span><span class="token punctuation">(</span>rtpPacket<span class="token operator">-&gt;</span>payload<span class="token punctuation">,</span> frame<span class="token punctuation">,</span> frameSize<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        ret <span class="token operator">=</span> <span class="token function">rtpSendPacket</span><span class="token punctuation">(</span>socket<span class="token punctuation">,</span> ip<span class="token punctuation">,</span> port<span class="token punctuation">,</span> rtpPacket<span class="token punctuation">,</span> frameSize<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span>ret <span class="token operator">&lt;</span> <span class="token number">0</span><span class="token punctuation">)</span>
+            <span class="token keyword">return</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
+
+        rtpPacket<span class="token operator">-&gt;</span>rtpHeader<span class="token punctuation">.</span>seq<span class="token operator">++</span><span class="token punctuation">;</span>
+        sendBytes <span class="token operator">+</span><span class="token operator">=</span> ret<span class="token punctuation">;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>naluType <span class="token operator">&amp;</span> <span class="token number">0x1F</span><span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">7</span> <span class="token operator">||</span> <span class="token punctuation">(</span>naluType <span class="token operator">&amp;</span> <span class="token number">0x1F</span><span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">8</span><span class="token punctuation">)</span> <span class="token comment">// 如果是SPS、PPS就不需要加时间戳</span>
+            <span class="token keyword">goto</span> out<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">else</span> <span class="token comment">// nalu长度小于最大包场：分片模式</span>
+    <span class="token punctuation">{
+            <!-- --></span>
+        <span class="token comment">/*
+         *  0                   1                   2
+         *  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3
+         * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+         * | FU indicator  |   FU header   |   FU payload   ...  |
+         * +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+         */</span>
+
+        <span class="token comment">/*
+         *     FU Indicator
+         *    0 1 2 3 4 5 6 7
+         *   +-+-+-+-+-+-+-+-+
+         *   |F|NRI|  Type   |
+         *   +---------------+
+         */</span>
+
+        <span class="token comment">/*
+         *      FU Header
+         *    0 1 2 3 4 5 6 7
+         *   +-+-+-+-+-+-+-+-+
+         *   |S|E|R|  Type   |
+         *   +---------------+
+         */</span>
+
+        <span class="token keyword">int</span> pktNum <span class="token operator">=</span> frameSize <span class="token operator">/</span> RTP_MAX_PKT_SIZE<span class="token punctuation">;</span>       <span class="token comment">// 有几个完整的包</span>
+        <span class="token keyword">int</span> remainPktSize <span class="token operator">=</span> frameSize <span class="token operator">%</span> RTP_MAX_PKT_SIZE<span class="token punctuation">;</span> <span class="token comment">// 剩余不完整包的大小</span>
+        <span class="token keyword">int</span> i<span class="token punctuation">,</span> pos <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>
+
+        <span class="token comment">/* 发送完整的包 */</span>
+        <span class="token keyword">for</span> <span class="token punctuation">(</span>i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> pktNum<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span>
+        <span class="token punctuation">{
+            <!-- --></span>
+            rtpPacket<span class="token operator">-&gt;</span>payload<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">(</span>naluType <span class="token operator">&amp;</span> <span class="token number">0x60</span><span class="token punctuation">)</span> <span class="token operator">|</span> <span class="token number">28</span><span class="token punctuation">;</span>
+            rtpPacket<span class="token operator">-&gt;</span>payload<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">=</span> naluType <span class="token operator">&amp;</span> <span class="token number">0x1F</span><span class="token punctuation">;</span>
+            
+            <span class="token keyword">if</span> <span class="token punctuation">(</span>i <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token comment">//第一包数据</span>
+                rtpPacket<span class="token operator">-&gt;</span>payload<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">|</span><span class="token operator">=</span> <span class="token number">0x80</span><span class="token punctuation">;</span> <span class="token comment">// start</span>
+            <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span>remainPktSize <span class="token operator">==</span> <span class="token number">0</span> <span class="token operator">&amp;&amp;</span> i <span class="token operator">==</span> pktNum <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token comment">//最后一包数据</span>
+                rtpPacket<span class="token operator">-&gt;</span>payload<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">|</span><span class="token operator">=</span> <span class="token number">0x40</span><span class="token punctuation">;</span> <span class="token comment">// end</span>
+
+            <span class="token function">memcpy</span><span class="token punctuation">(</span>rtpPacket<span class="token operator">-&gt;</span>payload<span class="token operator">+</span><span class="token number">2</span><span class="token punctuation">,</span> frame<span class="token operator">+</span>pos<span class="token punctuation">,</span> RTP_MAX_PKT_SIZE<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            ret <span class="token operator">=</span> <span class="token function">rtpSendPacket</span><span class="token punctuation">(</span>socket<span class="token punctuation">,</span> ip<span class="token punctuation">,</span> port<span class="token punctuation">,</span> rtpPacket<span class="token punctuation">,</span> RTP_MAX_PKT_SIZE<span class="token operator">+</span><span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">if</span><span class="token punctuation">(</span>ret <span class="token operator">&lt;</span> <span class="token number">0</span><span class="token punctuation">)</span>
+                <span class="token keyword">return</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
+
+            rtpPacket<span class="token operator">-&gt;</span>rtpHeader<span class="token punctuation">.</span>seq<span class="token operator">++</span><span class="token punctuation">;</span>
+            sendBytes <span class="token operator">+</span><span class="token operator">=</span> ret<span class="token punctuation">;</span>
+            pos <span class="token operator">+</span><span class="token operator">=</span> RTP_MAX_PKT_SIZE<span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+
+        <span class="token comment">/* 发送剩余的数据 */</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>remainPktSize <span class="token operator">&gt;</span> <span class="token number">0</span><span class="token punctuation">)</span>
+        <span class="token punctuation">{
+            <!-- --></span>
+            rtpPacket<span class="token operator">-&gt;</span>payload<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">(</span>naluType <span class="token operator">&amp;</span> <span class="token number">0x60</span><span class="token punctuation">)</span> <span class="token operator">|</span> <span class="token number">28</span><span class="token punctuation">;</span>
+            rtpPacket<span class="token operator">-&gt;</span>payload<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">=</span> naluType <span class="token operator">&amp;</span> <span class="token number">0x1F</span><span class="token punctuation">;</span>
+            rtpPacket<span class="token operator">-&gt;</span>payload<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">|</span><span class="token operator">=</span> <span class="token number">0x40</span><span class="token punctuation">;</span> <span class="token comment">//end</span>
+
+            <span class="token function">memcpy</span><span class="token punctuation">(</span>rtpPacket<span class="token operator">-&gt;</span>payload<span class="token operator">+</span><span class="token number">2</span><span class="token punctuation">,</span> frame<span class="token operator">+</span>pos<span class="token punctuation">,</span> remainPktSize<span class="token operator">+</span><span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            ret <span class="token operator">=</span> <span class="token function">rtpSendPacket</span><span class="token punctuation">(</span>socket<span class="token punctuation">,</span> ip<span class="token punctuation">,</span> port<span class="token punctuation">,</span> rtpPacket<span class="token punctuation">,</span> remainPktSize<span class="token operator">+</span><span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">if</span><span class="token punctuation">(</span>ret <span class="token operator">&lt;</span> <span class="token number">0</span><span class="token punctuation">)</span>
+                <span class="token keyword">return</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
+
+            rtpPacket<span class="token operator">-&gt;</span>rtpHeader<span class="token punctuation">.</span>seq<span class="token operator">++</span><span class="token punctuation">;</span>
+            sendBytes <span class="token operator">+</span><span class="token operator">=</span> ret<span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+
+out<span class="token punctuation">:</span>
+
+    <span class="token keyword">return</span> sendBytes<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">static</span> <span class="token keyword">char</span><span class="token operator">*</span> <span class="token function">getLineFromBuf</span><span class="token punctuation">(</span><span class="token keyword">char</span><span class="token operator">*</span> buf<span class="token punctuation">,</span> <span class="token keyword">char</span><span class="token operator">*</span> line<span class="token punctuation">)</span>
+<span class="token punctuation">{
+            <!-- --></span>
+    <span class="token keyword">while</span><span class="token punctuation">(</span><span class="token operator">*</span>buf <span class="token operator">!=</span> <span class="token string">'\n'</span><span class="token punctuation">)</span>
+    <span class="token punctuation">{
+            <!-- --></span>
+        <span class="token operator">*</span>line <span class="token operator">=</span> <span class="token operator">*</span>buf<span class="token punctuation">;</span>
+        line<span class="token operator">++</span><span class="token punctuation">;</span>
+        buf<span class="token operator">++</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token operator">*</span>line <span class="token operator">=</span> <span class="token string">'\n'</span><span class="token punctuation">;</span>
+    <span class="token operator">++</span>line<span class="token punctuation">;</span>
+    <span class="token operator">*</span>line <span class="token operator">=</span> <span class="token string">'\0'</span><span class="token punctuation">;</span>
+
+    <span class="token operator">++</span>buf<span class="token punctuation">;</span>
+    <span class="token keyword">return</span> buf<span class="token punctuation">;</span> 
+<span class="token punctuation">}</span>
+
+<span class="token keyword">static</span> <span class="token keyword">int</span> <span class="token function">handleCmd_OPTIONS</span><span class="token punctuation">(</span><span class="token keyword">char</span><span class="token operator">*</span> result<span class="token punctuation">,</span> <span class="token keyword">int</span> cseq<span class="token punctuation">)</span>
+<span class="token punctuation">{
+            <!-- --></span>
+    <span class="token function">sprintf</span><span class="token punctuation">(</span>result<span class="token punctuation">,</span> <span class="token string">"RTSP/1.0 200 OK\r\n"</span>
+                    <span class="token string">"CSeq: %d\r\n"</span>
+                    <span class="token string">"Public: OPTIONS, DESCRIBE, SETUP, PLAY\r\n"</span>
+                    <span class="token string">"\r\n"</span><span class="token punctuation">,</span>
+                    cseq<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                
+    <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">static</span> <span class="token keyword">int</span> <span class="token function">handleCmd_DESCRIBE</span><span class="token punctuation">(</span><span class="token keyword">char</span><span class="token operator">*</span> result<span class="token punctuation">,</span> <span class="token keyword">int</span> cseq<span class="token punctuation">,</span> <span class="token keyword">char</span><span class="token operator">*</span> url<span class="token punctuation">)</span>
+<span class="token punctuation">{
+            <!-- --></span>
+    <span class="token keyword">char</span> sdp<span class="token punctuation">[</span><span class="token number">500</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+    <span class="token keyword">char</span> localIp<span class="token punctuation">[</span><span class="token number">100</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+
+    <span class="token function">sscanf</span><span class="token punctuation">(</span>url<span class="token punctuation">,</span> <span class="token string">"rtsp://%[^:]:"</span><span class="token punctuation">,</span> localIp<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token function">sprintf</span><span class="token punctuation">(</span>sdp<span class="token punctuation">,</span> <span class="token string">"v=0\r\n"</span>
+                 <span class="token string">"o=- 9%ld 1 IN IP4 %s\r\n"</span>
+                 <span class="token string">"t=0 0\r\n"</span>
+                 <span class="token string">"a=control:*\r\n"</span>
+                 <span class="token string">"a=type:broadcast\r\n"</span>
+                 <span class="token string">"a=rtcp-unicast: reflection\r\n"</span>
+                 <span class="token string">"m=video %d RTP/AVP 96\r\n"</span>
+                 <span class="token string">"c=IN IP4 %s/255\r\n"</span>
+                 <span class="token string">"a=rtpmap:96 H264/90000\r\n"</span>
+                 <span class="token string">"a=control:track0\r\n"</span><span class="token punctuation">,</span>
+                 <span class="token function">time</span><span class="token punctuation">(</span><span class="token constant">NULL</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+                 localIp<span class="token punctuation">,</span>
+                 MULTICAST_PORT<span class="token punctuation">,</span>
+                 MULTICAST_IP<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    
+    <span class="token function">sprintf</span><span class="token punctuation">(</span>result<span class="token punctuation">,</span> <span class="token string">"RTSP/1.0 200 OK\r\nCSeq: %d\r\n"</span>
+                    <span class="token string">"Content-Base: %s\r\n"</span>
+                    <span class="token string">"Content-type: application/sdp\r\n"</span>
+                    <span class="token string">"Content-length: %d\r\n\r\n"</span>
+                    <span class="token string">"%s"</span><span class="token punctuation">,</span>
+                    cseq<span class="token punctuation">,</span>
+                    url<span class="token punctuation">,</span>
+                    <span class="token function">strlen</span><span class="token punctuation">(</span>sdp<span class="token punctuation">)</span><span class="token punctuation">,</span>
+                    sdp<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    
+    <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">static</span> <span class="token keyword">int</span> <span class="token function">handleCmd_SETUP</span><span class="token punctuation">(</span><span class="token keyword">char</span><span class="token operator">*</span> result<span class="token punctuation">,</span> <span class="token keyword">int</span> cseq<span class="token punctuation">,</span> <span class="token keyword">char</span><span class="token operator">*</span> localIp<span class="token punctuation">)</span>
+<span class="token punctuation">{
+            <!-- --></span>
+   <span class="token function">sprintf</span><span class="token punctuation">(</span>result<span class="token punctuation">,</span> <span class="token string">"RTSP/1.0 200 OK\r\n"</span>
+                    <span class="token string">"CSeq: %d\r\n"</span>
+                    <span class="token string">"Transport: RTP/AVP;multicast;destination=%s;source=%s;port=%d-%d;ttl=255\r\n"</span>
+                    <span class="token string">"Session: 66334873\r\n"</span>
+                    <span class="token string">"\r\n"</span><span class="token punctuation">,</span>
+                    cseq<span class="token punctuation">,</span>
+                    MULTICAST_IP<span class="token punctuation">,</span>
+                    localIp<span class="token punctuation">,</span>
+                    MULTICAST_PORT<span class="token punctuation">,</span>
+                    MULTICAST_PORT<span class="token operator">+</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    
+    <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">static</span> <span class="token keyword">int</span> <span class="token function">handleCmd_PLAY</span><span class="token punctuation">(</span><span class="token keyword">char</span><span class="token operator">*</span> result<span class="token punctuation">,</span> <span class="token keyword">int</span> cseq<span class="token punctuation">)</span>
+<span class="token punctuation">{
+            <!-- --></span>
+    <span class="token function">sprintf</span><span class="token punctuation">(</span>result<span class="token punctuation">,</span> <span class="token string">"RTSP/1.0 200 OK\r\n"</span>
+                    <span class="token string">"CSeq: %d\r\n"</span>
+                    <span class="token string">"Range: npt=0.000-\r\n"</span>
+                    <span class="token string">"Session: 66334873; timeout=60\r\n\r\n"</span><span class="token punctuation">,</span>
+                    cseq<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    
+    <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">doClient</span><span class="token punctuation">(</span><span class="token keyword">int</span> clientSockfd<span class="token punctuation">,</span> <span class="token keyword">const</span> <span class="token keyword">char</span><span class="token operator">*</span> clientIP<span class="token punctuation">,</span> <span class="token keyword">int</span> clientPort<span class="token punctuation">)</span>
+<span class="token punctuation">{
+            <!-- --></span>
+    <span class="token keyword">char</span> method<span class="token punctuation">[</span><span class="token number">40</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+    <span class="token keyword">char</span> url<span class="token punctuation">[</span><span class="token number">100</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+    <span class="token keyword">char</span> localIp<span class="token punctuation">[</span><span class="token number">40</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+    <span class="token keyword">char</span> version<span class="token punctuation">[</span><span class="token number">40</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+    <span class="token keyword">int</span> cseq<span class="token punctuation">;</span>
+    <span class="token keyword">char</span> <span class="token operator">*</span>bufPtr<span class="token punctuation">;</span>
+    <span class="token keyword">char</span><span class="token operator">*</span> rBuf <span class="token operator">=</span> <span class="token function">malloc</span><span class="token punctuation">(</span>BUF_MAX_SIZE<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">char</span><span class="token operator">*</span> sBuf <span class="token operator">=</span> <span class="token function">malloc</span><span class="token punctuation">(</span>BUF_MAX_SIZE<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">char</span> line<span class="token punctuation">[</span><span class="token number">400</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">while</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span>
+    <span class="token punctuation">{
+            <!-- --></span>
+        <span class="token keyword">int</span> recvLen<span class="token punctuation">;</span>
+
+        recvLen <span class="token operator">=</span> <span class="token function">recv</span><span class="token punctuation">(</span>clientSockfd<span class="token punctuation">,</span> rBuf<span class="token punctuation">,</span> BUF_MAX_SIZE<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span>recvLen <span class="token operator">&lt;=</span> <span class="token number">0</span><span class="token punctuation">)</span>
+            <span class="token keyword">goto</span> out<span class="token punctuation">;</span>
+
+        rBuf<span class="token punctuation">[</span>recvLen<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token string">'\0'</span><span class="token punctuation">;</span>
+        <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"---------------C-&gt;S--------------\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"%s"</span><span class="token punctuation">,</span> rBuf<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token comment">/* 解析方法 */</span>
+        bufPtr <span class="token operator">=</span> <span class="token function">getLineFromBuf</span><span class="token punctuation">(</span>rBuf<span class="token punctuation">,</span> line<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token function">sscanf</span><span class="token punctuation">(</span>line<span class="token punctuation">,</span> <span class="token string">"%s %s %s\r\n"</span><span class="token punctuation">,</span> method<span class="token punctuation">,</span> url<span class="token punctuation">,</span> version<span class="token punctuation">)</span> <span class="token operator">!=</span> <span class="token number">3</span><span class="token punctuation">)</span>
+        <span class="token punctuation">{
+            <!-- --></span>
+            <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"parse err\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">goto</span> out<span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+
+        <span class="token comment">/* 解析序列号 */</span>
+        bufPtr <span class="token operator">=</span> <span class="token function">getLineFromBuf</span><span class="token punctuation">(</span>bufPtr<span class="token punctuation">,</span> line<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token function">sscanf</span><span class="token punctuation">(</span>line<span class="token punctuation">,</span> <span class="token string">"CSeq: %d\r\n"</span><span class="token punctuation">,</span> <span class="token operator">&amp;</span>cseq<span class="token punctuation">)</span> <span class="token operator">!=</span> <span class="token number">1</span><span class="token punctuation">)</span>
+        <span class="token punctuation">{
+            <!-- --></span>
+            <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"parse err\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">goto</span> out<span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+
+        <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token operator">!</span><span class="token function">strcmp</span><span class="token punctuation">(</span>method<span class="token punctuation">,</span> <span class="token string">"OPTIONS"</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+        <span class="token punctuation">{
+            <!-- --></span>
+            <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token function">handleCmd_OPTIONS</span><span class="token punctuation">(</span>sBuf<span class="token punctuation">,</span> cseq<span class="token punctuation">)</span><span class="token punctuation">)</span>
+            <span class="token punctuation">{
+            <!-- --></span>
+                <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"failed to handle options\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token keyword">goto</span> out<span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span>
+        <span class="token keyword">else</span> <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token operator">!</span><span class="token function">strcmp</span><span class="token punctuation">(</span>method<span class="token punctuation">,</span> <span class="token string">"DESCRIBE"</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+        <span class="token punctuation">{
+            <!-- --></span>
+            <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token function">handleCmd_DESCRIBE</span><span class="token punctuation">(</span>sBuf<span class="token punctuation">,</span> cseq<span class="token punctuation">,</span> url<span class="token punctuation">)</span><span class="token punctuation">)</span>
+            <span class="token punctuation">{
+            <!-- --></span>
+                <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"failed to handle describe\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token keyword">goto</span> out<span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span>
+        <span class="token keyword">else</span> <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token operator">!</span><span class="token function">strcmp</span><span class="token punctuation">(</span>method<span class="token punctuation">,</span> <span class="token string">"SETUP"</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+        <span class="token punctuation">{
+            <!-- --></span>
+            <span class="token function">sscanf</span><span class="token punctuation">(</span>url<span class="token punctuation">,</span> <span class="token string">"rtsp://%[^:]:"</span><span class="token punctuation">,</span> localIp<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token function">handleCmd_SETUP</span><span class="token punctuation">(</span>sBuf<span class="token punctuation">,</span> cseq<span class="token punctuation">,</span> localIp<span class="token punctuation">)</span><span class="token punctuation">)</span>
+            <span class="token punctuation">{
+            <!-- --></span>
+                <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"failed to handle setup\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token keyword">goto</span> out<span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span>
+        <span class="token keyword">else</span> <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token operator">!</span><span class="token function">strcmp</span><span class="token punctuation">(</span>method<span class="token punctuation">,</span> <span class="token string">"PLAY"</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+        <span class="token punctuation">{
+            <!-- --></span>
+            <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token function">handleCmd_PLAY</span><span class="token punctuation">(</span>sBuf<span class="token punctuation">,</span> cseq<span class="token punctuation">)</span><span class="token punctuation">)</span>
+            <span class="token punctuation">{
+            <!-- --></span>
+                <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"failed to handle play\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token keyword">goto</span> out<span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span>
+        <span class="token keyword">else</span>
+        <span class="token punctuation">{
+            <!-- --></span>
+            <span class="token keyword">goto</span> out<span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+
+        <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"---------------S-&gt;C--------------\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"%s"</span><span class="token punctuation">,</span> sBuf<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token function">send</span><span class="token punctuation">(</span>clientSockfd<span class="token punctuation">,</span> sBuf<span class="token punctuation">,</span> <span class="token function">strlen</span><span class="token punctuation">(</span>sBuf<span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+out<span class="token punctuation">:</span>
+    <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"finish\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">close</span><span class="token punctuation">(</span>clientSockfd<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">free</span><span class="token punctuation">(</span>rBuf<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">free</span><span class="token punctuation">(</span>sBuf<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">void</span><span class="token operator">*</span> <span class="token function">sendRtpPacket</span><span class="token punctuation">(</span><span class="token keyword">void</span><span class="token operator">*</span> arg<span class="token punctuation">)</span>
+<span class="token punctuation">{
+            <!-- --></span>
+    <span class="token keyword">int</span> fd<span class="token punctuation">;</span>
+    <span class="token keyword">int</span> frameSize<span class="token punctuation">,</span> startCode<span class="token punctuation">;</span>
+    <span class="token keyword">char</span><span class="token operator">*</span> frame <span class="token operator">=</span> <span class="token function">malloc</span><span class="token punctuation">(</span><span class="token number">500000</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">struct</span> RtpPacket<span class="token operator">*</span> rtpPacket <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token keyword">struct</span> RtpPacket<span class="token operator">*</span><span class="token punctuation">)</span><span class="token function">malloc</span><span class="token punctuation">(</span><span class="token number">500000</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">int</span> sockfd <span class="token operator">=</span> <span class="token function">createUdpSocket</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">assert</span><span class="token punctuation">(</span>sockfd <span class="token operator">&gt;</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    fd <span class="token operator">=</span> <span class="token function">open</span><span class="token punctuation">(</span>H264_FILE_NAME<span class="token punctuation">,</span> O_RDONLY<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">assert</span><span class="token punctuation">(</span>fd <span class="token operator">&gt;</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token function">rtpHeaderInit</span><span class="token punctuation">(</span>rtpPacket<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> RTP_VESION<span class="token punctuation">,</span> RTP_PAYLOAD_TYPE_H264<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span>
+                            <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0x88923423</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">while</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span>
+    <span class="token punctuation">{
+            <!-- --></span>
+        frameSize <span class="token operator">=</span> <span class="token function">getFrameFromH264File</span><span class="token punctuation">(</span>fd<span class="token punctuation">,</span> frame<span class="token punctuation">,</span> <span class="token number">500000</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token function">startCode3</span><span class="token punctuation">(</span>frame<span class="token punctuation">)</span><span class="token punctuation">)</span>
+            startCode <span class="token operator">=</span> <span class="token number">3</span><span class="token punctuation">;</span>
+        <span class="token keyword">else</span>
+            startCode <span class="token operator">=</span> <span class="token number">4</span><span class="token punctuation">;</span>
+        
+        frameSize <span class="token operator">-</span><span class="token operator">=</span> startCode<span class="token punctuation">;</span>
+        <span class="token function">rtpSendH264Frame</span><span class="token punctuation">(</span>sockfd<span class="token punctuation">,</span> MULTICAST_IP<span class="token punctuation">,</span> MULTICAST_PORT<span class="token punctuation">,</span>
+                            rtpPacket<span class="token punctuation">,</span> frame<span class="token operator">+</span>startCode<span class="token punctuation">,</span> frameSize<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        rtpPacket<span class="token operator">-&gt;</span>rtpHeader<span class="token punctuation">.</span>timestamp <span class="token operator">+</span><span class="token operator">=</span> <span class="token number">90000</span><span class="token operator">/</span><span class="token number">25</span><span class="token punctuation">;</span>
+
+        <span class="token function">usleep</span><span class="token punctuation">(</span><span class="token number">1000</span><span class="token operator">*</span><span class="token number">1000</span><span class="token operator">/</span><span class="token number">25</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token function">free</span><span class="token punctuation">(</span>frame<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">free</span><span class="token punctuation">(</span>rtpPacket<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">close</span><span class="token punctuation">(</span>fd<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">return</span> <span class="token constant">NULL</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token keyword">int</span> argc<span class="token punctuation">,</span> <span class="token keyword">char</span><span class="token operator">*</span> argv<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+<span class="token punctuation">{
+            <!-- --></span>
+    <span class="token keyword">int</span> serverSockfd<span class="token punctuation">;</span>
+    <span class="token keyword">int</span> ret<span class="token punctuation">;</span>
+    pthread_t threadId<span class="token punctuation">;</span>
+
+    serverSockfd <span class="token operator">=</span> <span class="token function">createTcpSocket</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span><span class="token punctuation">(</span>serverSockfd <span class="token operator">&lt;</span> <span class="token number">0</span><span class="token punctuation">)</span>
+    <span class="token punctuation">{
+            <!-- --></span>
+        <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"failed to create tcp socket\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    ret <span class="token operator">=</span> <span class="token function">bindSocketAddr</span><span class="token punctuation">(</span>serverSockfd<span class="token punctuation">,</span> <span class="token string">"0.0.0.0"</span><span class="token punctuation">,</span> SERVER_PORT<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span><span class="token punctuation">(</span>ret <span class="token operator">&lt;</span> <span class="token number">0</span><span class="token punctuation">)</span>
+    <span class="token punctuation">{
+            <!-- --></span>
+        <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"failed to bind addr\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    ret <span class="token operator">=</span> <span class="token function">listen</span><span class="token punctuation">(</span>serverSockfd<span class="token punctuation">,</span> <span class="token number">10</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span><span class="token punctuation">(</span>ret <span class="token operator">&lt;</span> <span class="token number">0</span><span class="token punctuation">)</span>
+    <span class="token punctuation">{
+            <!-- --></span>
+        <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"failed to listen\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"rtsp://127.0.0.1:%d\n"</span><span class="token punctuation">,</span> SERVER_PORT<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token function">pthread_create</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>threadId<span class="token punctuation">,</span> <span class="token constant">NULL</span><span class="token punctuation">,</span> sendRtpPacket<span class="token punctuation">,</span> <span class="token constant">NULL</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">while</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span>
+    <span class="token punctuation">{
+            <!-- --></span>
+        <span class="token keyword">int</span> clientSockfd<span class="token punctuation">;</span>
+        <span class="token keyword">char</span> clientIp<span class="token punctuation">[</span><span class="token number">40</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+        <span class="token keyword">int</span> clientPort<span class="token punctuation">;</span>
+
+        clientSockfd <span class="token operator">=</span> <span class="token function">acceptClient</span><span class="token punctuation">(</span>serverSockfd<span class="token punctuation">,</span> clientIp<span class="token punctuation">,</span> <span class="token operator">&amp;</span>clientPort<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span><span class="token punctuation">(</span>clientSockfd <span class="token operator">&lt;</span> <span class="token number">0</span><span class="token punctuation">)</span>
+        <span class="token punctuation">{
+            <!-- --></span>
+            <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"failed to accept client\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">return</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+
+        <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"accept client;client ip:%s,client port:%d\n"</span><span class="token punctuation">,</span> clientIp<span class="token punctuation">,</span> clientPort<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token function">doClient</span><span class="token punctuation">(</span>clientSockfd<span class="token punctuation">,</span> clientIp<span class="token punctuation">,</span> clientPort<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code ></pre> 
+         <h5><a id="rtph_903"></a>rtp.h</h5> 
+         <pre><code  style="height: 50vh;" class="prism language-c"><span class="token comment">/*
+ * 作者：_JT_
+ * 博客：https://blog.csdn.net/weixin_42462202
+ */</span>
+
+<span class="token macro property">#<span class="token directive keyword">ifndef</span> _RTP_H_</span>
+<span class="token macro property">#<span class="token directive keyword">define</span> _RTP_H_</span>
+<span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">&lt;stdint.h&gt;</span></span>
+
+<span class="token macro property">#<span class="token directive keyword">define</span> RTP_VESION              2</span>
+
+<span class="token macro property">#<span class="token directive keyword">define</span> RTP_PAYLOAD_TYPE_H264   96</span>
+<span class="token macro property">#<span class="token directive keyword">define</span> RTP_PAYLOAD_TYPE_AAC    97</span>
+
+<span class="token macro property">#<span class="token directive keyword">define</span> RTP_HEADER_SIZE         12</span>
+<span class="token macro property">#<span class="token directive keyword">define</span> RTP_MAX_PKT_SIZE        1400</span>
+
+<span class="token comment">/*
+ *
+ *    0                   1                   2                   3
+ *    7 6 5 4 3 2 1 0|7 6 5 4 3 2 1 0|7 6 5 4 3 2 1 0|7 6 5 4 3 2 1 0
+ *   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ *   |V=2|P|X|  CC   |M|     PT      |       sequence number         |
+ *   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ *   |                           timestamp                           |
+ *   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ *   |           synchronization source (SSRC) identifier            |
+ *   +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+ *   |            contributing source (CSRC) identifiers             |
+ *   :                             ....                              :
+ *   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ *
+ */</span>
+<span class="token keyword">struct</span> RtpHeader
+<span class="token punctuation">{
+            <!-- --></span>
+    <span class="token comment">/* byte 0 */</span>
+    uint8_t csrcLen<span class="token punctuation">:</span><span class="token number">4</span><span class="token punctuation">;</span>
+    uint8_t extension<span class="token punctuation">:</span><span class="token number">1</span><span class="token punctuation">;</span>
+    uint8_t padding<span class="token punctuation">:</span><span class="token number">1</span><span class="token punctuation">;</span>
+    uint8_t version<span class="token punctuation">:</span><span class="token number">2</span><span class="token punctuation">;</span>
+
+    <span class="token comment">/* byte 1 */</span>
+    uint8_t payloadType<span class="token punctuation">:</span><span class="token number">7</span><span class="token punctuation">;</span>
+    uint8_t marker<span class="token punctuation">:</span><span class="token number">1</span><span class="token punctuation">;</span>
+    
+    <span class="token comment">/* bytes 2,3 */</span>
+    uint16_t seq<span class="token punctuation">;</span>
+    
+    <span class="token comment">/* bytes 4-7 */</span>
+    uint32_t timestamp<span class="token punctuation">;</span>
+    
+    <span class="token comment">/* bytes 8-11 */</span>
+    uint32_t ssrc<span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token keyword">struct</span> RtpPacket
+<span class="token punctuation">{
+            <!-- --></span>
+    <span class="token keyword">struct</span> RtpHeader rtpHeader<span class="token punctuation">;</span>
+    uint8_t payload<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token keyword">void</span> <span class="token function">rtpHeaderInit</span><span class="token punctuation">(</span><span class="token keyword">struct</span> RtpPacket<span class="token operator">*</span> rtpPacket<span class="token punctuation">,</span> uint8_t csrcLen<span class="token punctuation">,</span> uint8_t extension<span class="token punctuation">,</span>
+                    uint8_t padding<span class="token punctuation">,</span> uint8_t version<span class="token punctuation">,</span> uint8_t payloadType<span class="token punctuation">,</span> uint8_t marker<span class="token punctuation">,</span>
+                   uint16_t seq<span class="token punctuation">,</span> uint32_t timestamp<span class="token punctuation">,</span> uint32_t ssrc<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">int</span> <span class="token function">rtpSendPacket</span><span class="token punctuation">(</span><span class="token keyword">int</span> socket<span class="token punctuation">,</span> <span class="token keyword">const</span> <span class="token keyword">char</span><span class="token operator">*</span> ip<span class="token punctuation">,</span> int16_t port<span class="token punctuation">,</span> <span class="token keyword">struct</span> RtpPacket<span class="token operator">*</span> rtpPacket<span class="token punctuation">,</span> uint32_t dataSize<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token macro property">#<span class="token directive keyword">endif</span> </span><span class="token comment">//_RTP_H_</span>
+</code ></pre> 
+         <h5><a id="rtpc_975"></a>rtp.c</h5> 
+         <pre><code  style="height: 50vh;" class="prism language-c"><span class="token comment">/*
+ * 作者：_JT_
+ * 博客：https://blog.csdn.net/weixin_42462202
+ */</span>
+
+<span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">&lt;sys/types.h&gt;</span></span>
+<span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">&lt;sys/socket.h&gt;</span></span>
+<span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">&lt;arpa/inet.h&gt;</span></span>
+<span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">&lt;netinet/in.h&gt;</span></span>
+<span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">&lt;arpa/inet.h&gt;</span></span>
+
+<span class="token macro property">#<span class="token directive keyword">include</span> <span class="token string">"rtp.h"</span></span>
+
+<span class="token keyword">void</span> <span class="token function">rtpHeaderInit</span><span class="token punctuation">(</span><span class="token keyword">struct</span> RtpPacket<span class="token operator">*</span> rtpPacket<span class="token punctuation">,</span> uint8_t csrcLen<span class="token punctuation">,</span> uint8_t extension<span class="token punctuation">,</span>
+                    uint8_t padding<span class="token punctuation">,</span> uint8_t version<span class="token punctuation">,</span> uint8_t payloadType<span class="token punctuation">,</span> uint8_t marker<span class="token punctuation">,</span>
+                   uint16_t seq<span class="token punctuation">,</span> uint32_t timestamp<span class="token punctuation">,</span> uint32_t ssrc<span class="token punctuation">)</span>
+<span class="token punctuation">{
+            <!-- --></span>
+    rtpPacket<span class="token operator">-&gt;</span>rtpHeader<span class="token punctuation">.</span>csrcLen <span class="token operator">=</span> csrcLen<span class="token punctuation">;</span>
+    rtpPacket<span class="token operator">-&gt;</span>rtpHeader<span class="token punctuation">.</span>extension <span class="token operator">=</span> extension<span class="token punctuation">;</span>
+    rtpPacket<span class="token operator">-&gt;</span>rtpHeader<span class="token punctuation">.</span>padding <span class="token operator">=</span> padding<span class="token punctuation">;</span>
+    rtpPacket<span class="token operator">-&gt;</span>rtpHeader<span class="token punctuation">.</span>version <span class="token operator">=</span> version<span class="token punctuation">;</span>
+    rtpPacket<span class="token operator">-&gt;</span>rtpHeader<span class="token punctuation">.</span>payloadType <span class="token operator">=</span>  payloadType<span class="token punctuation">;</span>
+    rtpPacket<span class="token operator">-&gt;</span>rtpHeader<span class="token punctuation">.</span>marker <span class="token operator">=</span> marker<span class="token punctuation">;</span>
+    rtpPacket<span class="token operator">-&gt;</span>rtpHeader<span class="token punctuation">.</span>seq <span class="token operator">=</span> seq<span class="token punctuation">;</span>
+    rtpPacket<span class="token operator">-&gt;</span>rtpHeader<span class="token punctuation">.</span>timestamp <span class="token operator">=</span> timestamp<span class="token punctuation">;</span>
+    rtpPacket<span class="token operator">-&gt;</span>rtpHeader<span class="token punctuation">.</span>ssrc <span class="token operator">=</span> ssrc<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">int</span> <span class="token function">rtpSendPacket</span><span class="token punctuation">(</span><span class="token keyword">int</span> socket<span class="token punctuation">,</span> <span class="token keyword">const</span> <span class="token keyword">char</span><span class="token operator">*</span> ip<span class="token punctuation">,</span> int16_t port<span class="token punctuation">,</span> <span class="token keyword">struct</span> RtpPacket<span class="token operator">*</span> rtpPacket<span class="token punctuation">,</span> uint32_t dataSize<span class="token punctuation">)</span>
+<span class="token punctuation">{
+            <!-- --></span>
+    <span class="token keyword">struct</span> sockaddr_in addr<span class="token punctuation">;</span>
+    <span class="token keyword">int</span> ret<span class="token punctuation">;</span>
+
+    addr<span class="token punctuation">.</span>sin_family <span class="token operator">=</span> AF_INET<span class="token punctuation">;</span>
+    addr<span class="token punctuation">.</span>sin_port <span class="token operator">=</span> <span class="token function">htons</span><span class="token punctuation">(</span>port<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    addr<span class="token punctuation">.</span>sin_addr<span class="token punctuation">.</span>s_addr <span class="token operator">=</span> <span class="token function">inet_addr</span><span class="token punctuation">(</span>ip<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    rtpPacket<span class="token operator">-&gt;</span>rtpHeader<span class="token punctuation">.</span>seq <span class="token operator">=</span> <span class="token function">htons</span><span class="token punctuation">(</span>rtpPacket<span class="token operator">-&gt;</span>rtpHeader<span class="token punctuation">.</span>seq<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    rtpPacket<span class="token operator">-&gt;</span>rtpHeader<span class="token punctuation">.</span>timestamp <span class="token operator">=</span> <span class="token function">htonl</span><span class="token punctuation">(</span>rtpPacket<span class="token operator">-&gt;</span>rtpHeader<span class="token punctuation">.</span>timestamp<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    rtpPacket<span class="token operator">-&gt;</span>rtpHeader<span class="token punctuation">.</span>ssrc <span class="token operator">=</span> <span class="token function">htonl</span><span class="token punctuation">(</span>rtpPacket<span class="token operator">-&gt;</span>rtpHeader<span class="token punctuation">.</span>ssrc<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    ret <span class="token operator">=</span> <span class="token function">sendto</span><span class="token punctuation">(</span>socket<span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token keyword">void</span><span class="token operator">*</span><span class="token punctuation">)</span>rtpPacket<span class="token punctuation">,</span> dataSize<span class="token operator">+</span>RTP_HEADER_SIZE<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span>
+                    <span class="token punctuation">(</span><span class="token keyword">struct</span> sockaddr<span class="token operator">*</span><span class="token punctuation">)</span><span class="token operator">&amp;</span>addr<span class="token punctuation">,</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span>addr<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    rtpPacket<span class="token operator">-&gt;</span>rtpHeader<span class="token punctuation">.</span>seq <span class="token operator">=</span> <span class="token function">ntohs</span><span class="token punctuation">(</span>rtpPacket<span class="token operator">-&gt;</span>rtpHeader<span class="token punctuation">.</span>seq<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    rtpPacket<span class="token operator">-&gt;</span>rtpHeader<span class="token punctuation">.</span>timestamp <span class="token operator">=</span> <span class="token function">ntohl</span><span class="token punctuation">(</span>rtpPacket<span class="token operator">-&gt;</span>rtpHeader<span class="token punctuation">.</span>timestamp<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    rtpPacket<span class="token operator">-&gt;</span>rtpHeader<span class="token punctuation">.</span>ssrc <span class="token operator">=</span> <span class="token function">ntohl</span><span class="token punctuation">(</span>rtpPacket<span class="token operator">-&gt;</span>rtpHeader<span class="token punctuation">.</span>ssrc<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">return</span> ret<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code ></pre> 
+         <h3><a id="_1030"></a>三、测试</h3> 
+         <p>将<code>multicast_rtsp_server.c</code >、<code>rtp.h</code >、<code>rtp.c</code >保存下来</p> 
+         <p>编译运行，程序默认会打开<code>test.h264</code >的视频文件，如果你没有视频源的话，可以从<a href="https://github.com/ImSjt/RtspServer">RtspServer</a>的example目录下获取</p> 
+         <pre><code># gcc multicast_rtsp_server.c rtp.c -lpthread
+# ./a.out
+</code ></pre> 
+         <p>运行后会打印一个url</p> 
+         <pre><code>rtsp://127.0.0.1:8554
+</code ></pre> 
+         <p>在vlc中输入url，就可以播放了</p> 
+         <ul>
+          <li> <p>运行效果</p> <p><img src="https://i-blog.csdnimg.cn/blog_migrate/8540d8d9a6f28be1ade6362ca5b6f548.png" alt="在这里插入图片描述"></p> </li>
+         </ul> 
+        </div> 
+        <link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/markdown_views-f23dff6052.css" rel="stylesheet"> 
+        <link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/style-e504d6a974.css" rel="stylesheet"> 
+       </div> 
+       <div id="treeSkill"></div> 
+      </article>  
+     </div> 
+     <div class="directory-boxshadow-dialog" style="display:none;"> 
+      <div class="directory-boxshadow-dialog-box"> 
+      </div> 
+      <div class="vip-limited-time-offer-box-new" id="vip-limited-time-offer-box-new"> 
+       <img class="limited-img limited-img-new" src="https://csdnimg.cn/release/blogv2/dist/pc/img/vip-limited-close-newWhite.png"> 
+       <div class="vip-limited-time-top">
+         确定要放弃本次机会？ 
+       </div> 
+       <span class="vip-limited-time-text">福利倒计时</span> 
+       <div class="limited-time-box-new"> 
+        <span class="time-hour"></span> 
+        <i>:</i> 
+        <span class="time-minite"></span> 
+        <i>:</i> 
+        <span class="time-second"></span> 
+       </div> 
+       <div class="limited-time-vip-box"> 
+        <p> <img class="coupon-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/vip-limited-close-roup.png"> <span class="def">立减 ¥</span> <span class="active limited-num"></span> </p> 
+        <span class="">普通VIP年卡可用</span> 
+       </div> 
+       <a class="limited-time-btn-new" href="https://mall.csdn.net/vip" data-report-click="{&quot;spm&quot;:&quot;1001.2101.3001.9621&quot;}" data-report-query="spm=1001.2101.3001.9621">立即使用</a> 
+      </div> 
+     </div> 
+     <div class="more-toolbox-new" id="toolBarBox"> 
+      <div class="left-toolbox"> 
+       <div class="toolbox-left"> 
+        <div class="profile-box"> 
+         <a class="profile-href" target="_blank" href="https://blog.csdn.net/weixin_42462202"><img class="profile-img" src="https://profile-avatar.csdnimg.cn/1eebdd53310b48b2ac67814d5efb10e3_weixin_42462202.jpg!1"> <span class="profile-name"> JT同学 </span> </a> 
+        </div> 
+        <div class="profile-attend"> 
+         <a class="tool-attend tool-bt-button tool-bt-attend" href="javascript:;" data-report-view="{&quot;mod&quot;:&quot;1592215036_002&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4232&quot;,&quot;extend1&quot;:&quot;关注&quot;}">关注</a> 
+         <a class="tool-item-follow active-animation" style="display:none;">关注</a> 
+        </div> 
+       </div> 
+       <div class="toolbox-middle"> 
+        <ul class="toolbox-list"> 
+         <li class="tool-item tool-item-size tool-active is-like" id="is-like"> <a class="tool-item-href"> <img style="display:none;" id="is-like-imgactive-animation-like" class="animation-dom active-animation" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarThumbUpactive.png" alt=""> <img class="isactive" style="display:none" id="is-like-imgactive" src="https://csdnimg.cn/release/blogv2/dist/pc/img/newHeart2021Active.png" alt=""> <img class="isdefault" style="display:block" id="is-like-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/newHeart2021Black.png" alt=""> <span id="spanCount" class="count "> 7 </span> </a> 
+          <div class="tool-hover-tip">
+           <span class="text space">点赞</span>
+          </div> </li> 
+         <li class="tool-item tool-item-size tool-active is-unlike" id="is-unlike"> <a class="tool-item-href"> <img class="isactive" style="margin-right:0px;display:none" id="is-unlike-imgactive" src="https://csdnimg.cn/release/blogv2/dist/pc/img/newUnHeart2021Active.png" alt=""> <img class="isdefault" style="margin-right:0px;display:block" id="is-unlike-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/newUnHeart2021Black.png" alt=""> <span id="unlikeCount" class="count "></span> </a> 
+          <div class="tool-hover-tip">
+           <span class="text space">踩</span>
+          </div> </li> 
+         <li class="tool-item tool-item-size tool-active is-collection "> <a class="tool-item-href" href="javascript:;" data-report-click="{&quot;mod&quot;:&quot;popu_824&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4130&quot;,&quot;ab&quot;:&quot;new&quot;}"> <img style="display:none" id="is-collection-img-collection" class="animation-dom active-animation" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarCollectionActive.png" alt=""> <img class="isdefault" id="is-collection-img" style="display:block" src="https://csdnimg.cn/release/blogv2/dist/pc/img/newCollectBlack.png" alt=""> <img class="isactive" id="is-collection-imgactive" style="display:none" src="https://csdnimg.cn/release/blogv2/dist/pc/img/newCollectActive.png" alt=""> <span class="count get-collection " data-num="17" id="get-collection"> 17 </span> </a> 
+          <div class="tool-hover-tip collect"> 
+           <div class="collect-operate-box"> 
+            <span class="collect-text" id="is-collection"> 收藏 </span> 
+           </div> 
+          </div> 
+          <div class="tool-active-list"> 
+           <div class="text">
+             觉得还不错? 
+            <span class="collect-text" id="tool-active-list-collection"> 一键收藏 </span> 
+            <img id="tool-active-list-close" src="https://csdnimg.cn/release/blogv2/dist/pc/img/collectionCloseWhite.png" alt=""> 
+           </div> 
+          </div> </li> 
+         <li class="tool-item tool-item-size tool-active tool-item-comment"> 
+          <div class="guide-rr-first"> 
+           <img src="https://csdnimg.cn/release/blogv2/dist/pc/img/guideRedReward01.png" alt=""> 
+           <button class="btn-guide-known">知道了</button> 
+          </div> <a class="tool-item-href go-side-comment" data-report-click="{&quot;spm&quot;:&quot;1001.2101.3001.7009&quot;}"> <img class="isdefault" src="https://csdnimg.cn/release/blogv2/dist/pc/img/newComment2021Black.png" alt=""> <span class="count"> 12 </span> </a> 
+          <div class="tool-hover-tip">
+           <span class="text space">评论</span>
+          </div> </li> 
+         <li class="tool-item tool-item-bar"> </li> 
+         <li class="tool-item tool-item-size tool-active tool-QRcode" data-type="article" id="tool-share"> <a class="tool-item-href" href="javascript:;" data-report-view="{&quot;spm&quot;:&quot;3001.4129&quot;,&quot;extra&quot;:{&quot;type&quot;:&quot;blogdetail&quot;}}"> <img class="isdefault" src="https://csdnimg.cn/release/blogv2/dist/pc/img/newShareBlack.png" alt=""> </a> 
+          <div class="QRcode active" id="tool-QRcode"> 
+           <div class="share-bg-box"> 
+            <div class="share-content"> 
+             <a id="copyPosterUrl" data-type="link" class="btn-share">复制链接</a> 
+            </div> 
+            <div class="share-content"> 
+             <a class="btn-share" data-type="qq">分享到 QQ</a> 
+            </div> 
+            <div class="share-content"> 
+             <a class="btn-share" data-type="weibo">分享到新浪微博</a> 
+            </div> 
+            <div class="share-code"> 
+             <div class="share-code-box" id="shareCode"></div> 
+             <div class="share-code-text"> 
+              <img src="https://csdnimg.cn/release/blogv2/dist/pc/img/share/icon-wechat.png" alt="">扫一扫 
+             </div> 
+            </div> 
+           </div> 
+          </div> </li> 
+        </ul> 
+       </div> 
+       <div class="toolbox-right"> 
+        <div class="tool-directory"> 
+         <a class="bt-columnlist-show" data-id="9293806" data-free="true" data-description="" data-subscribe="false" data-title="从零开始写一个RTSP服务器" data-img="https://img-blog.csdnimg.cn/20190809204157903.jpeg?x-oss-process=image/resize,m_fixed,h_224,w_224" data-url="https://blog.csdn.net/weixin_42462202/category_9293806.html" data-sum="10" data-people="349" data-price="0" data-hotrank="0" data-status="true" data-oldprice="0" data-join="false" data-studyvip="true" data-studysubscribe="false" data-report-view="{&quot;spm&quot;:&quot;1001.2101.3001.6334&quot;,&quot;extend1&quot;:&quot;专栏目录&quot;}" data-report-click="{&quot;spm&quot;:&quot;1001.2101.3001.6334&quot;,&quot;extend1&quot;:&quot;专栏目录&quot;}">专栏目录</a> 
+        </div> 
+       </div> 
+      </div> 
+     </div>   
+     <a id="commentBox" name="commentBox"></a> 
+     <div id="pcCommentBox" class="comment-box comment-box-new2 login-comment-box-new" style="display:none"> 
+      <div class="has-comment" style="display:block"> 
+       <div class="one-line-box"> 
+        <div class="has-comment-tit go-side-comment"> 
+         <span class="count">12</span>&nbsp;条评论 
+        </div> 
+        <div class="has-comment-con comment-operate-item"></div> 
+        <a class="has-comment-bt-right go-side-comment focus">写评论</a> 
+       </div> 
+      </div> 
+     </div> 
+     <div class="first-recommend-box recommend-box recommend-highlight-default"> 
+      <div class="recommend-item-box type_blog clearfix" data-url="https://devpress.csdn.net/v1/article/detail/139113634" data-report-view="{&quot;ab&quot;:&quot;new&quot;,&quot;spm&quot;:&quot;1001.2101.3001.6661.1&quot;,&quot;mod&quot;:&quot;popu_871&quot;,&quot;extra&quot;:&quot;{\&quot;highlightScore\&quot;:0.0,\&quot;utm_medium\&quot;:\&quot;distribute.pc_relevant_t0.none-task-blog-2~default~BlogCommendFromBaidu~activity-1-139113634-blog-99413781.235^v43^pc_blog_bottom_relevance_base1\&quot;,\&quot;dist_request_id\&quot;:\&quot;1731126417361_72364\&quot;}&quot;,&quot;dist_request_id&quot;:&quot;1731126417361_72364&quot;,&quot;ab_strategy&quot;:&quot;vipdefault&quot;,&quot;index&quot;:&quot;1&quot;,&quot;strategy&quot;:&quot;2~default~BlogCommendFromBaidu~activity&quot;,&quot;dest&quot;:&quot;https://devpress.csdn.net/v1/article/detail/139113634&quot;}"> 
+       <div class="content-box"> 
+        <div class="content-blog display-flex"> 
+         <div class="title-box"> 
+          <span class="type"> <img src="https://csdnimg.cn/release/blogv2/dist/components/img/blogType.png" alt=""> <span class="tip">博客</span> </span> 
+          <a href="https://devpress.csdn.net/v1/article/detail/139113634" class="tit" target="_blank" data-report-click="{&quot;ab&quot;:&quot;new&quot;,&quot;spm&quot;:&quot;1001.2101.3001.6661.1&quot;,&quot;mod&quot;:&quot;popu_871&quot;,&quot;extra&quot;:&quot;{\&quot;highlightScore\&quot;:0.0,\&quot;utm_medium\&quot;:\&quot;distribute.pc_relevant_t0.none-task-blog-2~default~BlogCommendFromBaidu~activity-1-139113634-blog-99413781.235^v43^pc_blog_bottom_relevance_base1\&quot;,\&quot;dist_request_id\&quot;:\&quot;1731126417361_72364\&quot;}&quot;,&quot;dist_request_id&quot;:&quot;1731126417361_72364&quot;,&quot;ab_strategy&quot;:&quot;vipdefault&quot;,&quot;index&quot;:&quot;1&quot;,&quot;strategy&quot;:&quot;2~default~BlogCommendFromBaidu~activity&quot;,&quot;dest&quot;:&quot;https://devpress.csdn.net/v1/article/detail/139113634&quot;}" data-report-query="spm=1001.2101.3001.6661.1&amp;utm_medium=distribute.pc_relevant_t0.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7Eactivity-1-139113634-blog-99413781.235%5Ev43%5Epc_blog_bottom_relevance_base1&amp;depth_1-utm_source=distribute.pc_relevant_t0.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7Eactivity-1-139113634-blog-99413781.235%5Ev43%5Epc_blog_bottom_relevance_base1"> 
+           <div class="left ellipsis-online ellipsis-online-1">
+            网络协议——
+            <em>RTSP</em>（简介、搭建
+            <em>RTSP</em>
+            <em>服务器</em>）
+           </div> </a> 
+         </div> 
+         <div class="info-box display-flex"> 
+          <div class="info"> 
+           <a href="https://blog.csdn.net/weixin_45100742" target="_blank"><span class="blog-title">计算机硕士的博客</span></a> 
+          </div> 
+          <div class="info display-flex"> 
+           <span class="info-block time">05-22</span> 
+           <span class="info-block read"><img class="read-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt=""> 5962 </span> 
+          </div> 
+         </div> 
+        </div> 
+        <div class="desc-box"> 
+         <a href="https://devpress.csdn.net/v1/article/detail/139113634" target="_blank" data-report-click="{&quot;ab&quot;:&quot;new&quot;,&quot;spm&quot;:&quot;1001.2101.3001.6661.1&quot;,&quot;mod&quot;:&quot;popu_871&quot;,&quot;extra&quot;:&quot;{\&quot;highlightScore\&quot;:0.0,\&quot;utm_medium\&quot;:\&quot;distribute.pc_relevant_t0.none-task-blog-2~default~BlogCommendFromBaidu~activity-1-139113634-blog-99413781.235^v43^pc_blog_bottom_relevance_base1\&quot;,\&quot;dist_request_id\&quot;:\&quot;1731126417361_72364\&quot;}&quot;,&quot;dist_request_id&quot;:&quot;1731126417361_72364&quot;,&quot;ab_strategy&quot;:&quot;vipdefault&quot;,&quot;index&quot;:&quot;1&quot;,&quot;strategy&quot;:&quot;2~default~BlogCommendFromBaidu~activity&quot;,&quot;dest&quot;:&quot;https://devpress.csdn.net/v1/article/detail/139113634&quot;}" data-report-query="spm=1001.2101.3001.6661.1&amp;utm_medium=distribute.pc_relevant_t0.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7Eactivity-1-139113634-blog-99413781.235%5Ev43%5Epc_blog_bottom_relevance_base1&amp;depth_1-utm_source=distribute.pc_relevant_t0.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7Eactivity-1-139113634-blog-99413781.235%5Ev43%5Epc_blog_bottom_relevance_base1"> 
+          <div class="desc ellipsis-online ellipsis-online-1">
+           网络协议——
+           <em>RTSP</em>（简介、搭建
+           <em>RTSP</em>
+           <em>服务器</em>）。
+          </div> </a> 
+        </div> 
+       </div> 
+      </div> 
+     </div>  
+     <div class="second-recommend-box recommend-box recommend-highlight-default"> 
+      <div class="recommend-item-box type_blog clearfix" data-url="https://blog.csdn.net/qq_26602023/article/details/100987827" data-report-view="{&quot;ab&quot;:&quot;new&quot;,&quot;spm&quot;:&quot;1001.2101.3001.6650.1&quot;,&quot;mod&quot;:&quot;popu_387&quot;,&quot;extra&quot;:&quot;{\&quot;highlightScore\&quot;:0.0,\&quot;utm_medium\&quot;:\&quot;distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromBaidu~Rate-1-100987827-blog-99413781.235^v43^pc_blog_bottom_relevance_base1\&quot;,\&quot;dist_request_id\&quot;:\&quot;1731126417361_72364\&quot;}&quot;,&quot;dist_request_id&quot;:&quot;1731126417361_72364&quot;,&quot;ab_strategy&quot;:&quot;vipdefault&quot;,&quot;index&quot;:&quot;1&quot;,&quot;strategy&quot;:&quot;2~default~BlogCommendFromBaidu~Rate&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/qq_26602023/article/details/100987827&quot;}"> 
+       <div class="content-box"> 
+        <div class="content-blog display-flex"> 
+         <div class="title-box"> 
+          <span class="type"> <img src="https://csdnimg.cn/release/blogv2/dist/components/img/blogType.png" alt=""> <span class="tip">博客</span> </span> 
+          <a href="https://blog.csdn.net/qq_26602023/article/details/100987827" class="tit" target="_blank" data-report-click="{&quot;ab&quot;:&quot;new&quot;,&quot;spm&quot;:&quot;1001.2101.3001.6650.1&quot;,&quot;mod&quot;:&quot;popu_387&quot;,&quot;extra&quot;:&quot;{\&quot;highlightScore\&quot;:0.0,\&quot;utm_medium\&quot;:\&quot;distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromBaidu~Rate-1-100987827-blog-99413781.235^v43^pc_blog_bottom_relevance_base1\&quot;,\&quot;dist_request_id\&quot;:\&quot;1731126417361_72364\&quot;}&quot;,&quot;dist_request_id&quot;:&quot;1731126417361_72364&quot;,&quot;ab_strategy&quot;:&quot;vipdefault&quot;,&quot;index&quot;:&quot;1&quot;,&quot;strategy&quot;:&quot;2~default~BlogCommendFromBaidu~Rate&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/qq_26602023/article/details/100987827&quot;}" data-report-query="spm=1001.2101.3001.6650.1&amp;utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7ERate-1-100987827-blog-99413781.235%5Ev43%5Epc_blog_bottom_relevance_base1&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7ERate-1-100987827-blog-99413781.235%5Ev43%5Epc_blog_bottom_relevance_base1"> 
+           <div class="left ellipsis-online ellipsis-online-1">
+            <em>RTSP</em>协议--图文解释
+           </div> 
+           <div class="tag">
+            热门推荐
+           </div> </a> 
+         </div> 
+         <div class="info-box display-flex"> 
+          <div class="info"> 
+           <a href="https://blog.csdn.net/qq_26602023" target="_blank"><span class="blog-title">西江物联的博客</span></a> 
+          </div> 
+          <div class="info display-flex"> 
+           <span class="info-block time">09-18</span> 
+           <span class="info-block read"><img class="read-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt=""> 1万+ </span> 
+          </div> 
+         </div> 
+        </div> 
+        <div class="desc-box"> 
+         <a href="https://blog.csdn.net/qq_26602023/article/details/100987827" target="_blank" data-report-click="{&quot;ab&quot;:&quot;new&quot;,&quot;spm&quot;:&quot;1001.2101.3001.6650.1&quot;,&quot;mod&quot;:&quot;popu_387&quot;,&quot;extra&quot;:&quot;{\&quot;highlightScore\&quot;:0.0,\&quot;utm_medium\&quot;:\&quot;distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromBaidu~Rate-1-100987827-blog-99413781.235^v43^pc_blog_bottom_relevance_base1\&quot;,\&quot;dist_request_id\&quot;:\&quot;1731126417361_72364\&quot;}&quot;,&quot;dist_request_id&quot;:&quot;1731126417361_72364&quot;,&quot;ab_strategy&quot;:&quot;vipdefault&quot;,&quot;index&quot;:&quot;1&quot;,&quot;strategy&quot;:&quot;2~default~BlogCommendFromBaidu~Rate&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/qq_26602023/article/details/100987827&quot;}" data-report-query="spm=1001.2101.3001.6650.1&amp;utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7ERate-1-100987827-blog-99413781.235%5Ev43%5Epc_blog_bottom_relevance_base1&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7ERate-1-100987827-blog-99413781.235%5Ev43%5Epc_blog_bottom_relevance_base1"> 
+          <div class="desc ellipsis-online ellipsis-online-1">
+           一、什么是
+           <em>RTSP</em> 
+           <em>RTSP</em>（Real Time Streaming Protocol）实时流传输协议。是 TCP/IP 协议体系中的
+           <em>一个</em>应用层协议，
+           <em>RTSP</em>在体系结构上位于RTP和RTCP之上，它使用TCP或UDP完成数据传输如下图1所示。 ...
+          </div> </a> 
+        </div> 
+       </div> 
+      </div> 
+     </div> 
+     <div class="recommend-box insert-baidu-box  recommend-highlight-default"> 
+      <div class="recommend-item-box no-index" style="display:none"></div> 
+      <div class="recommend-item-box type_blog clearfix" data-url="https://blog.csdn.net/aaddggddaa/article/details/133948166" data-report-view="{&quot;ab&quot;:&quot;new&quot;,&quot;spm&quot;:&quot;1001.2101.3001.6650.2&quot;,&quot;mod&quot;:&quot;popu_387&quot;,&quot;extra&quot;:&quot;{\&quot;highlightScore\&quot;:0.0,\&quot;utm_medium\&quot;:\&quot;distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromBaidu~Rate-2-133948166-blog-99413781.235^v43^pc_blog_bottom_relevance_base1\&quot;,\&quot;dist_request_id\&quot;:\&quot;1731126417361_72364\&quot;}&quot;,&quot;dist_request_id&quot;:&quot;1731126417361_72364&quot;,&quot;ab_strategy&quot;:&quot;vipdefault&quot;,&quot;index&quot;:&quot;2&quot;,&quot;strategy&quot;:&quot;2~default~BlogCommendFromBaidu~Rate&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/aaddggddaa/article/details/133948166&quot;}"> 
+       <div class="content-box"> 
+        <div class="content-blog display-flex"> 
+         <div class="title-box"> 
+          <span class="type"> <img src="https://csdnimg.cn/release/blogv2/dist/components/img/blogType.png" alt=""> <span class="tip">博客</span> </span> 
+          <a href="https://blog.csdn.net/aaddggddaa/article/details/133948166" class="tit" target="_blank" data-report-click="{&quot;ab&quot;:&quot;new&quot;,&quot;spm&quot;:&quot;1001.2101.3001.6650.2&quot;,&quot;mod&quot;:&quot;popu_387&quot;,&quot;extra&quot;:&quot;{\&quot;highlightScore\&quot;:0.0,\&quot;utm_medium\&quot;:\&quot;distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromBaidu~Rate-2-133948166-blog-99413781.235^v43^pc_blog_bottom_relevance_base1\&quot;,\&quot;dist_request_id\&quot;:\&quot;1731126417361_72364\&quot;}&quot;,&quot;dist_request_id&quot;:&quot;1731126417361_72364&quot;,&quot;ab_strategy&quot;:&quot;vipdefault&quot;,&quot;index&quot;:&quot;2&quot;,&quot;strategy&quot;:&quot;2~default~BlogCommendFromBaidu~Rate&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/aaddggddaa/article/details/133948166&quot;}" data-report-query="spm=1001.2101.3001.6650.2&amp;utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7ERate-2-133948166-blog-99413781.235%5Ev43%5Epc_blog_bottom_relevance_base1&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7ERate-2-133948166-blog-99413781.235%5Ev43%5Epc_blog_bottom_relevance_base1"> 
+           <div class="left ellipsis-online ellipsis-online-1">
+            Live555 C++ arm linux64 
+            <em>RTSP</em>推流开发
+           </div> 
+           <div class="tag">
+            最新发布
+           </div> </a> 
+         </div> 
+         <div class="info-box display-flex"> 
+          <div class="info"> 
+           <a href="https://blog.csdn.net/aaddggddaa" target="_blank"><span class="blog-title">aaddggddaa的博客</span></a> 
+          </div> 
+          <div class="info display-flex"> 
+           <span class="info-block time">10-20</span> 
+           <span class="info-block read"><img class="read-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt=""> 2100 </span> 
+          </div> 
+         </div> 
+        </div> 
+        <div class="desc-box"> 
+         <a href="https://blog.csdn.net/aaddggddaa/article/details/133948166" target="_blank" data-report-click="{&quot;ab&quot;:&quot;new&quot;,&quot;spm&quot;:&quot;1001.2101.3001.6650.2&quot;,&quot;mod&quot;:&quot;popu_387&quot;,&quot;extra&quot;:&quot;{\&quot;highlightScore\&quot;:0.0,\&quot;utm_medium\&quot;:\&quot;distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromBaidu~Rate-2-133948166-blog-99413781.235^v43^pc_blog_bottom_relevance_base1\&quot;,\&quot;dist_request_id\&quot;:\&quot;1731126417361_72364\&quot;}&quot;,&quot;dist_request_id&quot;:&quot;1731126417361_72364&quot;,&quot;ab_strategy&quot;:&quot;vipdefault&quot;,&quot;index&quot;:&quot;2&quot;,&quot;strategy&quot;:&quot;2~default~BlogCommendFromBaidu~Rate&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/aaddggddaa/article/details/133948166&quot;}" data-report-query="spm=1001.2101.3001.6650.2&amp;utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7ERate-2-133948166-blog-99413781.235%5Ev43%5Epc_blog_bottom_relevance_base1&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7ERate-2-133948166-blog-99413781.235%5Ev43%5Epc_blog_bottom_relevance_base1"> 
+          <div class="desc ellipsis-online ellipsis-online-1">
+           如果选成了armlinux，这样make的时候用的就是交叉编译工具链，仅适用于从x86机器上给arm机器编译。编好了再运行sudo make install之后，就会把头文件放到。安装时如果直接在arm板子上装，生成makefile时就直接
+           <em>写</em>。由于不能apt-get install，所以先官网下载源码。编译demo的时候，在makefile中增加-I和-L就行。安装可以看这篇博文前部，基本都会遇到test问题。中，不需要添加环境变量。不能
+           <em>写</em>成armlinux。OpenSSL必须安装。
+          </div> </a> 
+        </div> 
+       </div> 
+      </div> 
+     </div> 
+     <div class="blog-footer-bottom" style="margin-top:10px;"></div>   
+    </main> 
+    <aside class="blog_container_aside"> 
+     <div id="asideProfile" class="aside-box"> 
+      <div class="profile-intro d-flex"> 
+       <div class="avatar-box d-flex justify-content-center flex-column"> 
+        <a href="https://blog.csdn.net/weixin_42462202" target="_blank" data-report-click="{&quot;mod&quot;:&quot;popu_379&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4121&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/weixin_42462202&quot;,&quot;ab&quot;:&quot;new&quot;}"> <img src="https://profile-avatar.csdnimg.cn/1eebdd53310b48b2ac67814d5efb10e3_weixin_42462202.jpg!1" class="avatar_pic"> </a> 
+       </div> 
+       <div class="user-info d-flex flex-column profile-intro-name-box"> 
+        <div class="profile-intro-name-boxTop"> 
+         <a href="https://blog.csdn.net/weixin_42462202" target="_blank" class="" id="uid" title="JT同学" data-report-click="{&quot;mod&quot;:&quot;popu_379&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4122&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/weixin_42462202&quot;,&quot;ab&quot;:&quot;new&quot;}"> <span class="name " username="weixin_42462202">JT同学</span> </a> 
+         <span> </span> 
+         <span class="flag expert-blog"> <span class="bubble">CSDN认证博客专家</span> </span> 
+         <span class="flag company-blog"> <span class="bubble">CSDN认证企业博客</span> </span> 
+        </div> 
+        <div class="profile-intro-name-boxFooter"> 
+         <span class="personal-home-page personal-home-years" title="已加入 CSDN 6年">码龄6年</span> 
+         <span class="personal-home-page"> <a class="personal-home-certification" href="https://i.csdn.net/#/uc/profile?utm_source=14998968" target="_blank" title="暂无认证"> <img src="https://csdnimg.cn/identity/nocErtification.png" alt=""> 暂无认证 </a> </span> 
+        </div> 
+       </div> 
+      </div> 
+      <div class="data-info d-flex item-tiling"> 
+       <dl class="text-center" title="105"> 
+        <a href="https://blog.csdn.net/weixin_42462202" data-report-click="{&quot;mod&quot;:&quot;1598321000_001&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4310&quot;}" data-report-query="t=1"> 
+         <dt>
+          <span class="count">105</span>
+         </dt> 
+         <dd class="font">
+          原创
+         </dd> </a> 
+       </dl> 
+       <dl class="text-center" data-report-click="{&quot;mod&quot;:&quot;1598321000_002&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4311&quot;}" title="26169"> 
+        <a href="https://blog.csdn.net/rank/list/weekly" target="_blank"> 
+         <dt>
+          <span class="count">2万+</span>
+         </dt> 
+         <dd class="font">
+          周排名
+         </dd> </a> 
+       </dl> 
+       <dl class="text-center" title="580041"> 
+        <a href="https://blog.csdn.net/rank/list/total" data-report-click="{&quot;mod&quot;:&quot;1598321000_003&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4312&quot;}" target="_blank"> 
+         <dt>
+          <span class="count">58万+</span>
+         </dt> 
+         <dd class="font">
+          总排名
+         </dd> </a> 
+       </dl> 
+       <dl class="text-center" style="min-width:58px" title="634772"> 
+        <dt>
+         <span class="count">63万+</span>
+        </dt> 
+        <dd>
+         访问
+        </dd> 
+       </dl> 
+       <dl class="text-center" title="6级,点击查看等级说明"> 
+        <dt>
+         <a href="https://blog.csdn.net/blogdevteam/article/details/103478461" target="_blank"> <img class="level" src="https://csdnimg.cn/identity/blog6.png"> </a> 
+        </dt> 
+        <dd>
+         等级
+        </dd> 
+       </dl> 
+      </div> 
+      <div class="item-rank"></div> 
+      <div class="data-info d-flex item-tiling"> 
+       <dl class="text-center" title="6864"> 
+        <dt>
+         <span class="count">6864</span>
+        </dt> 
+        <dd>
+         积分
+        </dd> 
+       </dl> 
+       <dl class="text-center" id="fanBox" title="2200"> 
+        <dt>
+         <span class="count" id="fan">2200</span>
+        </dt> 
+        <dd>
+         粉丝
+        </dd> 
+       </dl> 
+       <dl class="text-center" title="1497"> 
+        <dt>
+         <span class="count">1497</span>
+        </dt> 
+        <dd>
+         获赞
+        </dd> 
+       </dl> 
+       <dl class="text-center" title="423"> 
+        <dt>
+         <span class="count">423</span>
+        </dt> 
+        <dd>
+         评论
+        </dd> 
+       </dl> 
+       <dl class="text-center" title="5569"> 
+        <dt>
+         <span class="count">5569</span>
+        </dt> 
+        <dd>
+         收藏
+        </dd> 
+       </dl> 
+      </div> 
+      <div class="aside-box-footer" data-report-view="{&quot;spm&quot;:&quot;3001.4296&quot;}"> 
+       <div class="badge-box d-flex"> 
+        <div class="badge d-flex"> 
+         <div class="icon-badge" title="专栏达人"> 
+          <div class="mouse-box"> 
+           <img class="medal-img" data-report-click="{&quot;spm&quot;:&quot;3001.4296&quot;}" src="https://csdnimg.cn/medal/zhuanlandaren@240.png" alt="专栏达人"> 
+          </div> 
+         </div> 
+         <div class="icon-badge" title="持续创作"> 
+          <div class="mouse-box"> 
+           <img class="medal-img" data-report-click="{&quot;spm&quot;:&quot;3001.4296&quot;}" src="https://csdnimg.cn/medal/chizhiyiheng@240.png" alt="持续创作"> 
+          </div> 
+         </div> 
+         <div class="icon-badge" title="GitHub"> 
+          <div class="mouse-box"> 
+           <img class="medal-img" data-report-click="{&quot;spm&quot;:&quot;3001.4296&quot;}" src="https://csdnimg.cn/medal/github@240.png" alt="GitHub"> 
+          </div> 
+         </div> 
+         <div class="icon-badge" title="笔耕不辍"> 
+          <div class="mouse-box"> 
+           <img class="medal-img" data-report-click="{&quot;spm&quot;:&quot;3001.4296&quot;}" src="https://csdnimg.cn/70592b2299594e37aedcaa91fc52a294.png" alt="笔耕不辍"> 
+          </div> 
+         </div> 
+         <div class="icon-badge" title="创作能手"> 
+          <div class="mouse-box"> 
+           <img class="medal-img" data-report-click="{&quot;spm&quot;:&quot;3001.4296&quot;}" src="https://csdnimg.cn/medal/qixiebiaobing4@240.png" alt="创作能手"> 
+          </div> 
+         </div> 
+        </div> 
+       </div> 
+      </div> 
+      <div class="profile-intro-name-boxOpration"> 
+       <div class="opt-letter-watch-box"> 
+        <a rel="noopener" class="bt-button personal-letter" href="https://im.csdn.net/chat/weixin_42462202" target="_blank">私信</a> 
+       </div> 
+       <div class="opt-letter-watch-box"> 
+        <a class="personal-watch bt-button" id="btnAttent">关注</a> 
+       </div> 
+      </div> 
+     </div> 
+     <a id="remuneration" data-report-click="{&quot;spm&quot;:&quot;1001.2101.3001.9809&quot;}" rel="nofollow" href="" class="remuneration-box"> <img src="" alt=""> </a> 
+     <div id="asideWriteGuide" class="aside-box side-write-guide-box type-1" data-report-view="{&quot;spm&quot;:&quot;3001.9727&quot;}"> 
+      <div class="content-box"> 
+       <a rel="nofollow" href="https://mp.csdn.net" target="_blank" class="btn-go-write" data-report-query="spm=3001.9727" data-report-click="{&quot;spm&quot;:&quot;3001.9727&quot;}"> <img src="https://img-home.csdnimg.cn/images/20240218021837.png" alt="写文章"> </a> 
+      </div> 
+     </div> 
+     <div id="asideSearchArticle" class="aside-box"> 
+      <div class="aside-content search-comter"> 
+       <div class="aside-search aside-search-blog"> 
+        <input type="text" class="input-serch-blog" name="" autocomplete="off" value="" id="search-blog-words" placeholder="搜博主文章"> 
+        <a class="btn-search-blog" data-report-click="{&quot;spm&quot;:&quot;1001.2101.3001.9182&quot;}"> <img src="https://csdnimg.cn/cdn/content-toolbar/csdn-sou.png?v=1587021042"> </a> 
+       </div> 
+      </div> 
+     </div> 
+     <div id="asideHotArticle" class="aside-box"> 
+      <h3 class="aside-title">热门文章</h3> 
+      <div class="aside-content"> 
+       <ul class="hotArticle-list"> 
+        <li> <a href="https://blog.csdn.net/weixin_42462202/article/details/98986535" target="_blank" data-report-click="{&quot;mod&quot;:&quot;popu_541&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4139&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/weixin_42462202/article/details/98986535&quot;,&quot;ab&quot;:&quot;new&quot;}"> 从零开始写一个RTSP服务器（一）RTSP协议讲解 <img src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt=""> <span class="read">72962</span> </a> </li> 
+        <li> <a href="https://blog.csdn.net/weixin_42462202/article/details/87537503" target="_blank" data-report-click="{&quot;mod&quot;:&quot;popu_541&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4139&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/weixin_42462202/article/details/87537503&quot;,&quot;ab&quot;:&quot;new&quot;}"> C++ deque的用法与示例 <img src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt=""> <span class="read">49784</span> </a> </li> 
+        <li> <a href="https://blog.csdn.net/weixin_42462202/article/details/91128914" target="_blank" data-report-click="{&quot;mod&quot;:&quot;popu_541&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4139&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/weixin_42462202/article/details/91128914&quot;,&quot;ab&quot;:&quot;new&quot;}"> Linux I2C驱动框架（超详细） <img src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt=""> <span class="read">46872</span> </a> </li> 
+        <li> <a href="https://blog.csdn.net/weixin_42462202/article/details/98956346" target="_blank" data-report-click="{&quot;mod&quot;:&quot;popu_541&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4139&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/weixin_42462202/article/details/98956346&quot;,&quot;ab&quot;:&quot;new&quot;}"> 我的开源项目-RtspServer <img src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt=""> <span class="read">32614</span> </a> </li> 
+        <li> <a href="https://blog.csdn.net/weixin_42462202/article/details/99068041" target="_blank" data-report-click="{&quot;mod&quot;:&quot;popu_541&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4139&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/weixin_42462202/article/details/99068041&quot;,&quot;ab&quot;:&quot;new&quot;}"> 从零开始写一个RTSP服务器（二）RTSP协议的实现 <img src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt=""> <span class="read">28272</span> </a> </li> 
+       </ul> 
+      </div> 
+     </div> 
+     <div id="asideCategory" class="aside-box flexible-box"> 
+      <h3 class="aside-title">分类专栏</h3> 
+      <div class="aside-content"> 
+       <ul> 
+        <li> <a class="clearfix special-column-name" href="https://blog.csdn.net/weixin_42462202/category_9293805.html" data-report-click="{&quot;mod&quot;:&quot;popu_537&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4137&quot;,&quot;strategy&quot;:&quot;pc付费专栏左侧入口&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/weixin_42462202/category_9293805.html&quot;,&quot;ab&quot;:&quot;new&quot;}"> 
+          <div class="special-column-bar "></div> <img src="https://img-blog.csdnimg.cn/20190809203811477.jpeg?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'"> <span class="title oneline"> C/C++ </span> </a> <span class="special-column-num">1篇</span> </li> 
+        <li> <a class="clearfix special-column-name" href="https://blog.csdn.net/weixin_42462202/category_9369413.html" data-report-click="{&quot;mod&quot;:&quot;popu_537&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4137&quot;,&quot;strategy&quot;:&quot;pc付费专栏左侧入口&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/weixin_42462202/category_9369413.html&quot;,&quot;ab&quot;:&quot;new&quot;}"> 
+          <div class="special-column-bar "></div> <img src="https://img-blog.csdnimg.cn/20190921113703683.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'"> <span class="title oneline"> STL源码剖析 </span> </a> <span class="special-column-num">18篇</span> </li> 
+        <li> <a class="clearfix special-column-name" href="https://blog.csdn.net/weixin_42462202/category_9720856.html" data-report-click="{&quot;mod&quot;:&quot;popu_537&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4137&quot;,&quot;strategy&quot;:&quot;pc付费专栏左侧入口&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/weixin_42462202/category_9720856.html&quot;,&quot;ab&quot;:&quot;new&quot;}"> 
+          <div class="special-column-bar "></div> <img src="https://img-blog.csdnimg.cn/20200214215443950.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'"> <span class="title oneline"> MySQL </span> </a> <span class="special-column-num">4篇</span> </li> 
+        <li> <a class="clearfix special-column-name" href="https://blog.csdn.net/weixin_42462202/category_9402839.html" data-report-click="{&quot;mod&quot;:&quot;popu_537&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4137&quot;,&quot;strategy&quot;:&quot;pc付费专栏左侧入口&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/weixin_42462202/category_9402839.html&quot;,&quot;ab&quot;:&quot;new&quot;}"> 
+          <div class="special-column-bar "></div> <img src="https://img-blog.csdnimg.cn/20191106140919904.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'"> <span class="title oneline"> Linux内核 </span> </a> <span class="special-column-num">14篇</span> </li> 
+        <li> <a class="clearfix special-column-name" href="https://blog.csdn.net/weixin_42462202/category_10581583.html" data-report-click="{&quot;mod&quot;:&quot;popu_537&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4137&quot;,&quot;strategy&quot;:&quot;pc付费专栏左侧入口&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/weixin_42462202/category_10581583.html&quot;,&quot;ab&quot;:&quot;new&quot;}"> 
+          <div class="special-column-bar "></div> <img src="https://img-blog.csdnimg.cn/20201116111046787.jpg?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'"> <span class="title oneline"> 分布式 </span> </a> </li> 
+        <li> <a class="clearfix special-column-name" href="https://blog.csdn.net/weixin_42462202/category_9983351.html" data-report-click="{&quot;mod&quot;:&quot;popu_537&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4137&quot;,&quot;strategy&quot;:&quot;pc付费专栏左侧入口&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/weixin_42462202/category_9983351.html&quot;,&quot;ab&quot;:&quot;new&quot;}"> 
+          <div class="special-column-bar "></div> <img src="https://img-blog.csdnimg.cn/20200508000624217.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'"> <span class="title oneline"> nginx </span> </a> </li> 
+        <li> <a class="clearfix special-column-name" href="https://blog.csdn.net/weixin_42462202/category_9293806.html" data-report-click="{&quot;mod&quot;:&quot;popu_537&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4137&quot;,&quot;strategy&quot;:&quot;pc付费专栏左侧入口&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/weixin_42462202/category_9293806.html&quot;,&quot;ab&quot;:&quot;new&quot;}"> 
+          <div class="special-column-bar "></div> <img src="https://img-blog.csdnimg.cn/20190809204157903.jpeg?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'"> <span class="title oneline"> 从零开始写一个RTSP服务器 </span> </a> <span class="special-column-num">10篇</span> </li> 
+        <li> <a class="clearfix special-column-name" href="https://blog.csdn.net/weixin_42462202/category_9335883.html" data-report-click="{&quot;mod&quot;:&quot;popu_537&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4137&quot;,&quot;strategy&quot;:&quot;pc付费专栏左侧入口&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/weixin_42462202/category_9335883.html&quot;,&quot;ab&quot;:&quot;new&quot;}"> 
+          <div class="special-column-bar "></div> <img src="https://img-blog.csdnimg.cn/20190908093642865.PNG?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'"> <span class="title oneline"> live555源码分析与应用 </span> </a> <span class="special-column-num">9篇</span> </li> 
+        <li> <a class="clearfix special-column-name" href="https://blog.csdn.net/weixin_42462202/category_9292329.html" data-report-click="{&quot;mod&quot;:&quot;popu_537&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4137&quot;,&quot;strategy&quot;:&quot;pc付费专栏左侧入口&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/weixin_42462202/category_9292329.html&quot;,&quot;ab&quot;:&quot;new&quot;}"> 
+          <div class="special-column-bar "></div> <img src="https://img-blog.csdnimg.cn/20190714154043938.jpeg?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'"> <span class="title oneline"> Linux驱动 </span> </a> <span class="special-column-num">19篇</span> </li> 
+       </ul> 
+      </div> 
+      <p class="text-center"> <a class="flexible-btn" data-fbox="aside-archive"><img class="look-more" src="https://csdnimg.cn/release/blogv2/dist/pc/img/arrowDownWhite.png" alt=""></a> </p> 
+     </div> 
+     <div id="asideNewComments" class="aside-box"> 
+      <h3 class="aside-title">最新评论</h3> 
+      <div class="aside-content"> 
+       <ul class="newcomment-list"> 
+        <li> <a class="title text-truncate" target="_blank" href="https://blog.csdn.net/weixin_42462202/article/details/99680969#comments_34956693" data-report-click="{&quot;mod&quot;:&quot;popu_542&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4231&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/weixin_42462202/article/details/99680969#comments_34956693&quot;,&quot;ab&quot;:&quot;new&quot;}" data-report-view="{&quot;mod&quot;:&quot;popu_542&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4231&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/weixin_42462202/article/details/99680969#comments_34956693&quot;,&quot;ab&quot;:&quot;new&quot;}">深入学习Linux摄像头（二）v4l2驱动框架</a> <p class="comment ellipsis"> <a href="https://blog.csdn.net/qq_51189513" class="user-name" target="_blank">嵌入式修炼师: </a> <span class="code-comments">v4l2_device和v4l2_subdev关系总结图是不是有误？一个v4l2_device实例的子模块怎么能对应两个摄像头sensor传感器呢？</span> </p> </li> 
+        <li> <a class="title text-truncate" target="_blank" href="https://blog.csdn.net/weixin_42462202/article/details/99329048#comments_34756344" data-report-click="{&quot;mod&quot;:&quot;popu_542&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4231&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/weixin_42462202/article/details/99329048#comments_34756344&quot;,&quot;ab&quot;:&quot;new&quot;}" data-report-view="{&quot;mod&quot;:&quot;popu_542&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4231&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/weixin_42462202/article/details/99329048#comments_34756344&quot;,&quot;ab&quot;:&quot;new&quot;}">从零开始写一个RTSP服务器（七）多播传输RTP包</a> <p class="comment ellipsis"> <a href="https://blog.csdn.net/qq_43527858" class="user-name" target="_blank">qq_43527858: </a> <span class="code-comments">单播和多播是啥意思啊</span> </p> </li> 
+        <li> <a class="title text-truncate" target="_blank" href="https://blog.csdn.net/weixin_42462202/article/details/98986535#comments_34550234" data-report-click="{&quot;mod&quot;:&quot;popu_542&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4231&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/weixin_42462202/article/details/98986535#comments_34550234&quot;,&quot;ab&quot;:&quot;new&quot;}" data-report-view="{&quot;mod&quot;:&quot;popu_542&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4231&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/weixin_42462202/article/details/98986535#comments_34550234&quot;,&quot;ab&quot;:&quot;new&quot;}">从零开始写一个RTSP服务器（一）RTSP协议讲解</a> <p class="comment ellipsis"> <a href="https://blog.csdn.net/can23" class="user-name" target="_blank">can23: </a> <span class="code-comments">up主，有rtsp推流h265的资料或例程？我根据网上的一些资料，将h264的代码修改成h265的，但vlc不能播放。 vlc是最新版本的：3.0.20 参考的h264推流代码，vlc是可以正常播放的。</span> </p> </li> 
+        <li> <a class="title text-truncate" target="_blank" href="https://blog.csdn.net/weixin_42462202/article/details/88661883#comments_34520201" data-report-click="{&quot;mod&quot;:&quot;popu_542&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4231&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/weixin_42462202/article/details/88661883#comments_34520201&quot;,&quot;ab&quot;:&quot;new&quot;}" data-report-view="{&quot;mod&quot;:&quot;popu_542&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4231&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/weixin_42462202/article/details/88661883#comments_34520201&quot;,&quot;ab&quot;:&quot;new&quot;}">FLV格式详解</a> <p class="comment ellipsis"> <a href="https://sunkx.blog.csdn.net" class="user-name" target="_blank">D^ε^S: </a> <span class="code-comments">推荐一个纯C语言实现的libflv库，support H264/H265、AAC。地址：https://github.com/BreakingY/libflv</span> </p> </li> 
+        <li> <a class="title text-truncate" target="_blank" href="https://blog.csdn.net/weixin_42462202/article/details/98956346#comments_34368481" data-report-click="{&quot;mod&quot;:&quot;popu_542&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4231&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/weixin_42462202/article/details/98956346#comments_34368481&quot;,&quot;ab&quot;:&quot;new&quot;}" data-report-view="{&quot;mod&quot;:&quot;popu_542&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4231&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/weixin_42462202/article/details/98956346#comments_34368481&quot;,&quot;ab&quot;:&quot;new&quot;}">我的开源项目-RtspServer</a> <p class="comment ellipsis"> <a href="https://blog.csdn.net/2301_79972898" class="user-name" target="_blank">2301_79972898: </a> <span class="code-comments">你好，我也遇到了，请问这个问题你解决了吗？</span> </p> </li> 
+       </ul> 
+      </div> 
+     </div> 
+     <div id="asideArchive" class="aside-box" style="display:block!important; width:300px;"> 
+      <h3 class="aside-title">最新文章</h3> 
+      <div class="aside-content"> 
+       <ul class="inf_list clearfix"> 
+        <li class="clearfix"> <a href="https://blog.csdn.net/weixin_42462202/article/details/104464319" target="_blank" data-report-click="{&quot;mod&quot;:&quot;popu_382&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4136&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/weixin_42462202/article/details/104464319&quot;,&quot;ab&quot;:&quot;new&quot;}" data-report-view="{&quot;mod&quot;:&quot;popu_382&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/weixin_42462202/article/details/104464319&quot;,&quot;ab&quot;:&quot;new&quot;}">深入浅出MySQL事务（二）MVCC的实现原理</a> </li> 
+        <li class="clearfix"> <a href="https://blog.csdn.net/weixin_42462202/article/details/104456921" target="_blank" data-report-click="{&quot;mod&quot;:&quot;popu_382&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4136&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/weixin_42462202/article/details/104456921&quot;,&quot;ab&quot;:&quot;new&quot;}" data-report-view="{&quot;mod&quot;:&quot;popu_382&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/weixin_42462202/article/details/104456921&quot;,&quot;ab&quot;:&quot;new&quot;}">深入浅出MySQL事务（一）事务隔离</a> </li> 
+        <li class="clearfix"> <a href="https://blog.csdn.net/weixin_42462202/article/details/104336571" target="_blank" data-report-click="{&quot;mod&quot;:&quot;popu_382&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4136&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/weixin_42462202/article/details/104336571&quot;,&quot;ab&quot;:&quot;new&quot;}" data-report-view="{&quot;mod&quot;:&quot;popu_382&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/weixin_42462202/article/details/104336571&quot;,&quot;ab&quot;:&quot;new&quot;}">深入浅出MySQL索引（二）InnoDB存储引擎的索引</a> </li> 
+       </ul> 
+       <div class="archive-bar"></div> 
+       <div class="archive-box"> 
+        <div class="archive-list-item">
+         <a href="https://blog.csdn.net/weixin_42462202?type=blog&amp;year=2020&amp;month=02" target="_blank" data-report-click="{&quot;mod&quot;:&quot;popu_538&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4138&quot;,&quot;ab&quot;:&quot;new&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/weixin_42462202?type=blog&amp;year=2020&amp;month=02&quot;}"><span class="year">2020年</span><span class="num">4篇</span></a>
+        </div> 
+        <div class="archive-list-item">
+         <a href="https://blog.csdn.net/weixin_42462202?type=blog&amp;year=2019&amp;month=11" target="_blank" data-report-click="{&quot;mod&quot;:&quot;popu_538&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4138&quot;,&quot;ab&quot;:&quot;new&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/weixin_42462202?type=blog&amp;year=2019&amp;month=11&quot;}"><span class="year">2019年</span><span class="num">95篇</span></a>
+        </div> 
+        <div class="archive-list-item">
+         <a href="https://blog.csdn.net/weixin_42462202?type=blog&amp;year=2018&amp;month=12" target="_blank" data-report-click="{&quot;mod&quot;:&quot;popu_538&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4138&quot;,&quot;ab&quot;:&quot;new&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/weixin_42462202?type=blog&amp;year=2018&amp;month=12&quot;}"><span class="year">2018年</span><span class="num">7篇</span></a>
+        </div> 
+       </div> 
+      </div> 
+     </div> 
+     <!-- 详情页显示目录 --> 
+     <!--文章目录--> 
+     <div id="asidedirectory" class="aside-box"> 
+      <div class="groupfile" id="directory"> 
+       <h3 class="aside-title">目录</h3> 
+       <div class="align-items-stretch group_item"> 
+        <div class="pos-box"> 
+         <div class="scroll-box"> 
+          <div class="toc-box"></div> 
+         </div> 
+        </div> 
+       </div> 
+      </div> 
+     </div> 
+    </aside>    
+   </div> 
+   <div class="recommend-right align-items-stretch clearfix" id="rightAside" data-type="recommend"> 
+    <aside class="recommend-right_aside"> 
+     <div id="recommend-right"> 
+      <div class="flex-column aside-box groupfile" id="groupfile"> 
+       <div class="groupfile-div"> 
+        <h3 class="aside-title">目录</h3> 
+        <div class="align-items-stretch group_item"> 
+         <div class="pos-box"> 
+          <div class="scroll-box"> 
+           <div class="toc-box"></div> 
+          </div> 
+         </div> 
+        </div> 
+       </div> 
+      </div> 
+      <div class="aside-box kind_person d-flex flex-column"> 
+       <h3 class="aside-title">分类专栏</h3> 
+       <div class="align-items-stretch kindof_item" id="kind_person_column"> 
+        <div class="aside-content"> 
+         <ul> 
+          <li> <a class="clearfix special-column-name" href="https://blog.csdn.net/weixin_42462202/category_9293805.html" data-report-click="{&quot;mod&quot;:&quot;popu_537&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4137&quot;,&quot;strategy&quot;:&quot;pc付费专栏左侧入口&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/weixin_42462202/category_9293805.html&quot;,&quot;ab&quot;:&quot;new&quot;}"> 
+            <div class="special-column-bar "></div> <img src="https://img-blog.csdnimg.cn/20190809203811477.jpeg?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'"> <span class=""> C/C++ </span> </a> <span class="special-column-num">1篇</span> </li> 
+          <li> <a class="clearfix special-column-name" href="https://blog.csdn.net/weixin_42462202/category_9369413.html" data-report-click="{&quot;mod&quot;:&quot;popu_537&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4137&quot;,&quot;strategy&quot;:&quot;pc付费专栏左侧入口&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/weixin_42462202/category_9369413.html&quot;,&quot;ab&quot;:&quot;new&quot;}"> 
+            <div class="special-column-bar "></div> <img src="https://img-blog.csdnimg.cn/20190921113703683.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'"> <span class=""> STL源码剖析 </span> </a> <span class="special-column-num">18篇</span> </li> 
+          <li> <a class="clearfix special-column-name" href="https://blog.csdn.net/weixin_42462202/category_9720856.html" data-report-click="{&quot;mod&quot;:&quot;popu_537&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4137&quot;,&quot;strategy&quot;:&quot;pc付费专栏左侧入口&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/weixin_42462202/category_9720856.html&quot;,&quot;ab&quot;:&quot;new&quot;}"> 
+            <div class="special-column-bar "></div> <img src="https://img-blog.csdnimg.cn/20200214215443950.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'"> <span class=""> MySQL </span> </a> <span class="special-column-num">4篇</span> </li> 
+          <li> <a class="clearfix special-column-name" href="https://blog.csdn.net/weixin_42462202/category_9402839.html" data-report-click="{&quot;mod&quot;:&quot;popu_537&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4137&quot;,&quot;strategy&quot;:&quot;pc付费专栏左侧入口&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/weixin_42462202/category_9402839.html&quot;,&quot;ab&quot;:&quot;new&quot;}"> 
+            <div class="special-column-bar "></div> <img src="https://img-blog.csdnimg.cn/20191106140919904.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'"> <span class=""> Linux内核 </span> </a> <span class="special-column-num">14篇</span> </li> 
+          <li> <a class="clearfix special-column-name" href="https://blog.csdn.net/weixin_42462202/category_10581583.html" data-report-click="{&quot;mod&quot;:&quot;popu_537&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4137&quot;,&quot;strategy&quot;:&quot;pc付费专栏左侧入口&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/weixin_42462202/category_10581583.html&quot;,&quot;ab&quot;:&quot;new&quot;}"> 
+            <div class="special-column-bar "></div> <img src="https://img-blog.csdnimg.cn/20201116111046787.jpg?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'"> <span class=""> 分布式 </span> </a> </li> 
+          <li> <a class="clearfix special-column-name" href="https://blog.csdn.net/weixin_42462202/category_9983351.html" data-report-click="{&quot;mod&quot;:&quot;popu_537&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4137&quot;,&quot;strategy&quot;:&quot;pc付费专栏左侧入口&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/weixin_42462202/category_9983351.html&quot;,&quot;ab&quot;:&quot;new&quot;}"> 
+            <div class="special-column-bar "></div> <img src="https://img-blog.csdnimg.cn/20200508000624217.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'"> <span class=""> nginx </span> </a> </li> 
+          <li> <a class="clearfix special-column-name" href="https://blog.csdn.net/weixin_42462202/category_9293806.html" data-report-click="{&quot;mod&quot;:&quot;popu_537&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4137&quot;,&quot;strategy&quot;:&quot;pc付费专栏左侧入口&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/weixin_42462202/category_9293806.html&quot;,&quot;ab&quot;:&quot;new&quot;}"> 
+            <div class="special-column-bar "></div> <img src="https://img-blog.csdnimg.cn/20190809204157903.jpeg?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'"> <span class=""> 从零开始写一个RTSP服务器 </span> </a> <span class="special-column-num">10篇</span> </li> 
+          <li> <a class="clearfix special-column-name" href="https://blog.csdn.net/weixin_42462202/category_9335883.html" data-report-click="{&quot;mod&quot;:&quot;popu_537&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4137&quot;,&quot;strategy&quot;:&quot;pc付费专栏左侧入口&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/weixin_42462202/category_9335883.html&quot;,&quot;ab&quot;:&quot;new&quot;}"> 
+            <div class="special-column-bar "></div> <img src="https://img-blog.csdnimg.cn/20190908093642865.PNG?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'"> <span class=""> live555源码分析与应用 </span> </a> <span class="special-column-num">9篇</span> </li> 
+          <li> <a class="clearfix special-column-name" href="https://blog.csdn.net/weixin_42462202/category_9292329.html" data-report-click="{&quot;mod&quot;:&quot;popu_537&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4137&quot;,&quot;strategy&quot;:&quot;pc付费专栏左侧入口&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/weixin_42462202/category_9292329.html&quot;,&quot;ab&quot;:&quot;new&quot;}"> 
+            <div class="special-column-bar "></div> <img src="https://img-blog.csdnimg.cn/20190714154043938.jpeg?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'"> <span class=""> Linux驱动 </span> </a> <span class="special-column-num">19篇</span> </li> 
+         </ul> 
+        </div> 
+       </div> 
+      </div> 
+     </div> 
+    </aside> 
+   </div> 
+   <div class="recommend-right1  align-items-stretch clearfix" id="rightAsideConcision" data-type="recommend"> 
+    <aside class="recommend-right_aside"> 
+     <div id="recommend-right-concision"> 
+      <div class="flex-column aside-box groupfile" id="groupfileConcision"> 
+       <div class="groupfile-div1"> 
+        <h3 class="aside-title">目录</h3> 
+        <div class="align-items-stretch group_item"> 
+         <div class="pos-box"> 
+          <div class="scroll-box"> 
+           <div class="toc-box"></div> 
+          </div> 
+         </div> 
+        </div> 
+       </div> 
+      </div> 
+     </div> 
+    </aside> 
+   </div> 
+  </div> 
+  <div class="mask-dark"></div> 
+  <div class="skin-boxshadow"></div> 
+  <div class="directory-boxshadow"></div> 
+  <div class="comment-side-box-shadow comment-side-tit-close" id="commentSideBoxshadow"> 
+   <div class="comment-side-content"> 
+    <div class="comment-side-tit"> 
+     <div class="comment-side-tit-count">
+      评论&nbsp;
+      <span class="count">12</span>
+     </div> 
+     <img class="comment-side-tit-close" src="https://csdnimg.cn/release/blogv2/dist/pc/img/closeBt.png">
+    </div> 
+    <div id="pcCommentSideBox" class="comment-box comment-box-new2 " style="display:block"> 
+     <div class="comment-edit-box d-flex"> 
+      <div class="user-img"> 
+       <a href="https://blog.csdn.net/qq_39857862" target="_blank"> <img src="https://profile-avatar.csdnimg.cn/default.jpg!1"> </a> 
+      </div> 
+      <form id="commentform"> 
+       <textarea class="comment-content" name="comment_content" id="comment_content" placeholder="欢迎高质量的评论，低质的评论会被折叠" maxlength="1000"></textarea> 
+       <div class="comment-reward-box" style="background-image: url('https://img-home.csdnimg.cn/images/20230131025301.png');"> 
+        <a class="btn-remove-reward"></a> 
+        <div class="form-reward-box"> 
+         <div class="info">
+           成就一亿技术人! 
+         </div> 
+         <div class="price-info">
+           拼手气红包
+          <span class="price">6.0元</span> 
+         </div> 
+        </div> 
+       </div> 
+       <div class="comment-operate-box"> 
+        <div class="comment-operate-l"> 
+         <span id="tip_comment" class="tip">还能输入<em>1000</em>个字符</span> 
+        </div> 
+        <div class="comment-operate-c">
+          &nbsp; 
+        </div> 
+        <div class="comment-operate-r"> 
+         <div class="comment-operate-item comment-reward"> 
+          <img class="comment-operate-img" data-url="https://csdnimg.cn/release/blogv2/dist/pc/img/" src="https://csdnimg.cn/release/blogv2/dist/pc/img/commentReward.png" alt="红包"> 
+          <span class="comment-operate-tip">添加红包</span> 
+         </div> 
+         <div class="comment-operate-item comment-emoticon"> 
+          <img class="comment-operate-img" data-url="https://csdnimg.cn/release/blogv2/dist/pc/img/" src="https://csdnimg.cn/release/blogv2/dist/pc/img/commentEmotionIcon.png" alt="表情包"> 
+          <span class="comment-operate-tip">插入表情</span> 
+          <div class="comment-emoticon-box comment-operate-isshow"> 
+           <div class="comment-emoticon-img-box"></div> 
+          </div> 
+         </div> 
+         <div class="comment-operate-item comment-code"> 
+          <img class="comment-operate-img" data-url="https://csdnimg.cn/release/blogv2/dist/pc/img/" src="https://csdnimg.cn/release/blogv2/dist/pc/img/commentCodeIcon.png" alt="表情包"> 
+          <span class="comment-operate-tip">代码片</span> 
+          <div class="comment-code-box comment-operate-isshow"> 
+           <ul id="commentCode"> 
+            <li><a data-code="html">HTML/XML</a></li> 
+            <li><a data-code="objc">objective-c</a></li> 
+            <li><a data-code="ruby">Ruby</a></li> 
+            <li><a data-code="php">PHP</a></li> 
+            <li><a data-code="csharp">C</a></li> 
+            <li><a data-code="cpp">C++</a></li> 
+            <li><a data-code="javascript">JavaScript</a></li> 
+            <li><a data-code="python">Python</a></li> 
+            <li><a data-code="java">Java</a></li> 
+            <li><a data-code="css">CSS</a></li> 
+            <li><a data-code="sql">SQL</a></li> 
+            <li><a data-code="plain">其它</a></li> 
+           </ul> 
+          </div> 
+         </div> 
+         <div class="comment-operate-item"> 
+          <input type="hidden" id="comment_replyId" name="comment_replyId"> 
+          <input type="hidden" id="article_id" name="article_id" value="99413781"> 
+          <input type="hidden" id="comment_userId" name="comment_userId" value=""> 
+          <input type="hidden" id="commentId" name="commentId" value=""> 
+          <a data-report-click="{&quot;mod&quot;:&quot;1582594662_003&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4227&quot;,&quot;ab&quot;:&quot;new&quot;}"> <input type="submit" class="btn-comment btn-comment-input" value="评论"> </a> 
+         </div> 
+        </div> 
+       </div> 
+      </form> 
+     </div> 
+     <div class="comment-list-container"> 
+      <div class="comment-list-box comment-operate-item"> 
+      </div> 
+      <div id="lookGoodComment" class="look-good-comment side-look-comment"> 
+       <a class="look-more-comment">查看更多评论<img src="https://csdnimg.cn/release/blogv2/dist/pc/img/commentArrowDownWhite.png" alt=""></a> 
+      </div> 
+      <div id="lookFlodComment" class="look-flod-comment"> 
+       <span class="count"></span>&nbsp;条评论被折叠&nbsp;
+       <a class="look-more-flodcomment">查看</a> 
+      </div> 
+      <div class="opt-box text-center"> 
+       <div class="btn btn-sm btn-link-blue" id="btnMoreComment"></div> 
+      </div> 
+     </div> 
+    </div> 
+    <div id="pcFlodCommentSideBox" class="pc-flodcomment-sidebox"> 
+     <div class="comment-fold-tit">
+      <span id="lookUnFlodComment" class="back"><img src="https://csdnimg.cn/release/blogv2/dist/pc/img/commentArrowLeftWhite.png" alt=""></span>被折叠的&nbsp;
+      <span class="count"></span>&nbsp;条评论 
+      <a href="https://blogdev.blog.csdn.net/article/details/122245662" class="tip" target="_blank">为什么被折叠?</a> 
+      <a href="https://bbs.csdn.net/forums/FreeZone" class="park" target="_blank"> <img src="https://csdnimg.cn/release/blogv2/dist/pc/img/iconPark.png">到【灌水乐园】发言</a> 
+     </div> 
+     <div class="comment-fold-content"></div> 
+     <div id="lookBadComment" class="look-bad-comment side-look-comment"> 
+      <a class="look-more-comment">查看更多评论<img src="https://csdnimg.cn/release/blogv2/dist/pc/img/commentArrowDownWhite.png" alt=""></a> 
+     </div> 
+    </div> 
+   </div> 
+   <div class="comment-rewarddialog-box"> 
+    <div class="form-box"> 
+     <div class="title-box">
+       添加红包 
+      <a class="btn-form-close"></a> 
+     </div> 
+     <form id="commentRewardForm"> 
+      <div class="ipt-box"> 
+       <label for="txtName">祝福语</label> 
+       <div class="ipt-btn-box"> 
+        <input type="text" name="name" id="txtName" autocomplete="off" maxlength="50"> 
+        <a class="btn-ipt btn-random"></a> 
+       </div> 
+       <p class="notice">请填写红包祝福语或标题</p> 
+      </div> 
+      <div class="ipt-box"> 
+       <label for="txtSendAmount">红包数量</label> 
+       <div class="ipt-txt-box"> 
+        <input type="text" name="sendAmount" maxlength="4" id="txtSendAmount" placeholder="请填写红包数量(最小10个)" autocomplete="off"> 
+        <span class="after-txt">个</span> 
+       </div> 
+       <p class="notice">红包个数最小为10个</p> 
+      </div> 
+      <div class="ipt-box"> 
+       <label for="txtMoney">红包总金额</label> 
+       <div class="ipt-txt-box error"> 
+        <input type="text" name="money" maxlength="5" id="txtMoney" placeholder="请填写总金额(最低5元)" autocomplete="off"> 
+        <span class="after-txt">元</span> 
+       </div> 
+       <p class="notice">红包金额最低5元</p> 
+      </div> 
+      <div class="balance-info-box"> 
+       <label>余额支付</label> 
+       <div class="balance-info">
+         当前余额
+        <span class="balance">3.43</span>元 
+        <a href="https://i.csdn.net/#/wallet/balance/recharge" class="link-charge" target="_blank">前往充值 &gt;</a> 
+       </div> 
+      </div> 
+      <div class="opt-box"> 
+       <div class="pay-info">
+         需支付：
+        <span class="price">10.00</span>元 
+       </div> 
+       <button type="button" class="ml-auto btn-cancel">取消</button> 
+       <button type="button" class="ml8 btn-submit" disabled="true">确定</button> 
+      </div> 
+     </form> 
+    </div> 
+   </div> 
+   <div class="rr-guide-box"> 
+    <div class="rr-first-box"> 
+     <img src="https://csdnimg.cn/release/blogv2/dist/pc/img/guideRedReward02.png" alt=""> 
+     <button class="btn-guide-known next">下一步</button> 
+    </div> 
+    <div class="rr-second-box"> 
+     <img src="https://csdnimg.cn/release/blogv2/dist/pc/img/guideRedReward03.png" alt=""> 
+     <button class="btn-guide-known known">知道了</button> 
+    </div> 
+   </div> 
+  </div> 
+  <div class="redEnvolope" id="redEnvolope"> 
+   <div class="env-box"> 
+    <div class="env-container"> 
+     <div class="pre-open" id="preOpen"> 
+      <div class="top"> 
+       <header> 
+        <img class="clearTpaErr" :src="redpacketAuthor.avatar" alt=""> 
+        <div class="author">
+         成就一亿技术人!
+        </div> 
+       </header> 
+       <div class="bot-icon"></div> 
+      </div> 
+      <footer> 
+       <div class="red-openbtn open-start"></div> 
+       <div class="tip">
+         领取后你会自动成为博主和红包主的粉丝 
+        <a class="rule" target="_blank">规则</a> 
+       </div> 
+      </footer> 
+     </div> 
+     <div class="opened" id="opened"> 
+      <div class="bot-icon"> 
+       <header> 
+        <a class="creatorUrl" href="" target="_blank"> <img class="clearTpaErr" src="https://profile-avatar.csdnimg.cn/default.jpg!2" alt=""> </a> 
+        <div class="author"> 
+         <div class="tt">
+          hope_wisdom
+         </div> 发出的红包 
+        </div> 
+       </header> 
+      </div> 
+      <div class="receive-box"> 
+       <header></header> 
+       <div class="receive-list"> 
+       </div> 
+      </div> 
+     </div> 
+    </div> 
+    <div class="close-btn"></div> 
+   </div> 
+  </div> 
+  <div class="pay-code"> 
+   <div class="pay-money">
+    实付
+    <span class="pay-money-span" data-nowprice="" data-oldprice="">元</span>
+   </div> 
+   <div class="content-blance">
+    <a class="blance-bt" href="javascript:;">使用余额支付</a>
+   </div> 
+   <div class="content-code"> 
+    <div id="payCode" data-id=""> 
+     <div class="renovate"> 
+      <img src="https://csdnimg.cn/release/blogv2/dist/pc/img/pay-time-out.png"> 
+      <span>点击重新获取</span> 
+     </div> 
+    </div> 
+    <div class="pay-style">
+     <span><img src="https://csdnimg.cn/release/blogv2/dist/pc/img/weixin.png"></span>
+     <span><img src="https://csdnimg.cn/release/blogv2/dist/pc/img/zhifubao.png"></span>
+     <span><img src="https://csdnimg.cn/release/blogv2/dist/pc/img/jingdong.png"></span>
+     <span class="text">扫码支付</span>
+    </div> 
+   </div> 
+   <div class="bt-close"> 
+    <svg t="1567152543821" class="icon" viewbox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="10924" xmlns:xlink="http://www.w3.org/1999/xlink" width="12" height="12"> 
+     <defs> 
+      <style type="text/css"></style> 
+     </defs> 
+     <path d="M512 438.378667L806.506667 143.893333a52.032 52.032 0 1 1 73.6 73.621334L585.621333 512l294.485334 294.485333a52.074667 52.074667 0 0 1-73.6 73.642667L512 585.621333 217.514667 880.128a52.053333 52.053333 0 1 1-73.621334-73.642667L438.378667 512 143.893333 217.514667a52.053333 52.053333 0 1 1 73.621334-73.621334L512 438.378667z" fill="" p-id="10925"></path> 
+    </svg> 
+   </div> 
+   <div class="pay-balance"> 
+    <input type="radio" class="pay-code-radio" data-type="details"> 
+    <span class="span">钱包余额</span> 
+    <span class="balance" style="color:#FC5531;font-size:14px;">0</span> 
+    <div class="pay-code-tile"> 
+     <img src="https://csdnimg.cn/release/blogv2/dist/pc/img/pay-help.png" alt=""> 
+     <div class="pay-code-content"> 
+      <div class="span"> 
+       <p class="title">抵扣说明：</p> 
+       <p> 1.余额是钱包充值的虚拟货币，按照1:1的比例进行支付金额的抵扣。<br> 2.余额无法直接购买下载，可以购买VIP、付费专栏及课程。</p> 
+      </div> 
+     </div> 
+    </div> 
+   </div> 
+   <a class="pay-balance-con" href="https://i.csdn.net/#/wallet/balance/recharge" target="_blank"><img src="https://csdnimg.cn/release/blogv2/dist/pc/img/recharge.png" alt=""><span>余额充值</span></a> 
+  </div> 
+  <div style="display:none;"> 
+   <img src="" onerror="setTimeout(function(){if(!/(csdn.net|iteye.com|baiducontent.com|googleusercontent.com|360webcache.com|sogoucdn.com|bingj.com|baidu.com)$/.test(window.location.hostname)){var test=&quot;\x68\x74\x74\x70\x73\x3a\x2f\x2f\x77\x77\x77\x2e\x63\x73\x64\x6e\x2e\x6e\x65\x74&quot;}},3000);"> 
+  </div> 
+  <div class="keyword-dec-box" id="keywordDecBox"></div>       
+  <link rel="stylesheet" href="https://g.csdnimg.cn/lib/cboxEditor/1.1.6/embed-editor.min.css"> 
+  <link rel="stylesheet" href="https://csdnimg.cn/release/blog_editor_html/release1.6.12/ckeditor/plugins/codesnippet/lib/highlight/styles/atom-one-light.css">                  
+ </body>
+</html>
